@@ -229,3 +229,21 @@ test("no console errors on key pages", async ({ page }) => {
   }
   expect(errors).toEqual([]);
 });
+
+test.describe("first-time guidance", () => {
+  test("welcome card and field guide explain the map", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByTestId("welcome-card")).toBeVisible();
+    await (await hydrated(page.getByTestId("guide-button"))).click();
+    const guide = page.getByTestId("field-guide");
+    await expect(guide).toContainText("Frontier ridge");
+    await expect(guide).toContainText("Grid reference");
+    await page.keyboard.press("Escape");
+    await expect(guide).toHaveCount(0);
+    await page.getByTestId("welcome-dismiss").click();
+    await expect(page.getByTestId("welcome-card")).toHaveCount(0);
+    await page.reload();
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(page.getByTestId("welcome-card")).toHaveCount(0);
+  });
+});

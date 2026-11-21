@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronDown, Search, SlidersHorizontal, X } from "lucide-react";
 import { useQueryState } from "./useQueryState";
@@ -162,10 +162,19 @@ export function SearchBox() {
   const { get, update } = useQueryState();
   const [value, setValue] = useState(get("q") ?? "");
   const current = get("q") ?? "";
-  useEffect(() => setValue(current), [current]);
+  // only push what the user typed; a URL change from elsewhere (e.g. "Clear all")
+  // resets the box and cancels any pending debounce instead of re-applying stale input
+  const dirty = useRef(false);
   useEffect(() => {
-    if (value === current) return;
-    const t = setTimeout(() => update({ q: value.trim() || null }), 250);
+    dirty.current = false;
+    setValue(current);
+  }, [current]);
+  useEffect(() => {
+    if (!dirty.current || value === current) return;
+    const t = setTimeout(() => {
+      dirty.current = false;
+      update({ q: value.trim() || null });
+    }, 250);
     return () => clearTimeout(t);
   }, [value, current, update]);
   return (
@@ -173,14 +182,22 @@ export function SearchBox() {
       <Search size={15} className="text-ink-3" />
       <input
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) => {
+          dirty.current = true;
+          setValue(e.target.value);
+        }}
         placeholder="Filter by model, lab, family or provider…"
         className="w-full bg-transparent text-[14px] outline-none placeholder:text-ink-3"
         aria-label="Filter models"
         data-testid="models-search"
       />
       {value && (
-        <button onClick={() => setValue("")} aria-label="Clear search" className="text-ink-3 hover:text-ink">
+        <button
+          onClick={() => {
+            dirty.current = true;
+            setValue("");
+          }}
+          aria-label="Clear search" className="text-ink-3 hover:text-ink">
           <X size={14} />
         </button>
       )}

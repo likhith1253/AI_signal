@@ -10,6 +10,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { CommandPaletteProvider, Kbd, usePalette } from "./CommandPalette";
 import { CompareTray } from "./CompareTray";
 import { SurveyLoader } from "./SurveyLoader";
+import { FieldGuideButton, FieldGuideProvider } from "./FieldGuide";
 import { useCompare } from "@/lib/compare-store";
 
 const COLLAPSE_KEY = "oneatlas.sidebar.collapsed";
@@ -115,6 +116,7 @@ function TopBar({ onMenu }: { onMenu: () => void }) {
               )}
             </AnimatePresence>
           </Link>
+          <FieldGuideButton />
           <ThemeToggle />
         </div>
       </div>
@@ -156,6 +158,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <CommandPaletteProvider>
+      <FieldGuideProvider>
       <SurveyLoader />
       <div className="flex min-h-dvh">
         <motion.aside
@@ -248,6 +251,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </div>
       <CompareTray />
+      </FieldGuideProvider>
     </CommandPaletteProvider>
   );
 }

@@ -6,6 +6,7 @@ import { WORKLOADS } from "@/server/recommend/workloads";
 import { Container, LinkArrow, Panel, SectionTitle } from "@/components/ui/primitives";
 import { CountUp, Reveal, Stagger, StaggerItem } from "@/components/ui/motion";
 import { HeroSearch } from "@/components/shell/HeroSearch";
+import { WelcomeCard } from "@/components/shell/FieldGuide";
 import { TopoMap } from "@/components/charts/TopoMap";
 import { ChangeFeed } from "@/components/ledger/ChangeFeed";
 import { LabMark } from "@/components/identity/LabMark";
@@ -78,6 +79,7 @@ export default async function Home() {
             </div>
           </div>
           <div className="mt-5 border-t-[3px] border-double border-ink" />
+          <WelcomeCard />
         </div>
       </section>
 

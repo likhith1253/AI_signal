@@ -4,7 +4,31 @@
 
 Built as a full-stack internship assignment with Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS v4, Prisma and PostgreSQL.
 
-> Live: _see deployment section_ · Repo: https://github.com/likhith1253/AI_signal
+> **Live: https://oneatlas-tau.vercel.app** · Repo: https://github.com/likhith1253/AI_signal
+
+## Demo
+
+![OneAtlas walkthrough](docs/media/walkthrough.gif)
+
+▶ **[Full walkthrough video (MP4, ~2 min, captioned)](docs/media/walkthrough.mp4)**, recorded on the live deployment.
+
+## Walkthrough: a guided tour
+
+New visitors get a one-time "New here?" card, and a **Field guide** (the "?" button or the <kbd>?</kbd> key) explains every symbol in plain words. A tour of the product:
+
+1. **Overview (Sheet 01).** The first visit plays a short triangulation-survey loader (click to skip). The hero is a **topographic map computed from real data**: each ▲ is a model placed by blended price (left → right, log scale) and AA Intelligence Index (bottom → top). Contours are a density estimate of where models cluster, and the **red dashed ridge** is the Pareto frontier. Hover anywhere for a crosshair, grid reference and model card; click a station to open it. Below the map: *field dispatches* (the change ledger), the frontier list, the leading Atlas scores, workload "routes", best value, newly charted models, model types and the largest providers.
+2. **Search.** Press <kbd>Ctrl</kbd>+<kbd>K</kbd> (or <kbd>/</kbd>) anywhere. Results are grouped into models, labs, providers and pages, with keyboard navigation and recent history.
+3. **Models (Sheet 02).** Filter by type, capability, input modality, blended-price ceiling, context window, lab, provider and open weights. Sort by Atlas score, price (input/output/blended), context, release date, provider count or name. Every filter lives in the URL, so a view can be shared. The + on a row adds it to the **compare tray**.
+4. **A model page.** A spec strip (context, max output, cheapest input/output, blended price, providers), its grid reference, a **locator inset** on the map, and the **Atlas score trace**, which shows for each of the 8 dimensions the raw input, normalization, weight and contribution. Then **provider availability** (same model, different prices, quantization and uptime, with the price spread), benchmarks shaded by percentile, an evolution timeline from the ledger, the model-level spec, capabilities with evidence, and provenance.
+5. **Workload finder (Sheet 03).** Pick a job (software development, agents, vision, long context…) and optionally a price ceiling, minimum context or open weights. Picks come with written reasons and caveats. It's deterministic, with no LLM in the loop.
+6. **Compare (Sheet 04).** Up to four models side by side: Atlas dimensions, pricing, specs, capabilities and every benchmark any of them has, with the best value in each row highlighted. "Only show differences" hides identical rows, and the URL is shareable.
+7. **Rankings (Sheet 05).** External leaderboards (AA Intelligence, Coding, Agentic; Design Arena categories), specification boards (longest context, cheapest) and Atlas-derived boards (overall, value), each labelled by origin. On "Atlas overall", drag the weight sliders and the rows animate to their new ranks.
+8. **Benchmarks (Sheet 06).** The benchmark registry with sources, scales and coverage, plus a percentile heat-matrix.
+9. **Ecosystem (Sheet 07).** A lab × provider matrix showing who serves whom (copper outline = the lab's own API) and capability coverage by lab.
+10. **Labs and providers (Sheets 08–09).** Lab profiles with a release timeline by family; provider catalogues showing how each price compares with the cheapest alternative.
+11. **Atlas Engine (Sheet 10).** A live diagram of the ingestion pipeline with real per-stage timings, run history (plan / apply / baseline), data freshness and the full change ledger.
+12. **Methodology (Sheet 11).** Generated from the scoring code's own constants.
+
 
 ---
 
