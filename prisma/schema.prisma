@@ -1,0 +1,441 @@
+// OneAtlas — Atlas Intelligence Engine schema
+//
+// Layers:
+//   1. Registry      Lab, ModelFamily, Model, Modality, Capability
+//   2. Providers     Provider, Offering (model x provider availability)
+//   3. Pricing       Price (current, per offering/component/tier), PriceSnapshot (history)
+//   4. Benchmarks    Benchmark, BenchmarkResult
+//   5. Atlas Score   ModelScore (materialized, versioned methodology)
+//   7. Ingestion     DataSource, IngestionJob
+//
+// Layer 6 (recommendation) is pure application logic over these tables.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─────────────────────────── Provenance ───────────────────────────
+
+enum SourceKind {
+  API // fetched from a public API
+  CURATED // hand-maintained reference data committed to the repo
+  DERIVED // computed by OneAtlas from other records
+}
+
+model DataSource {
+  id            String       @id @default(cuid())
+  slug          String       @unique
+  name          String
+  url           String
+  kind          SourceKind
+  description   String?
+  termsNote     String?
+  lastSuccessAt DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  jobs              IngestionJob[]
+  models            Model[]
+  benchmarks        Benchmark[]
+  benchmarkResults  BenchmarkResult[]
+}
+
+enum JobStatus {
+  RUNNING
+  SUCCEEDED
+  PARTIAL // finished, but some records failed validation
+  FAILED
+}
+
+model IngestionJob {
+  id          String     @id @default(cuid())
+  sourceId    String
+  source      DataSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  status      JobStatus  @default(RUNNING)
+  trigger     String // "cli" | "api" | "cron"
+  startedAt   DateTime   @default(now())
+  finishedAt  DateTime?
+  /// counters: fetched, valid, invalid, created, updated, unchanged, priceChanges ...
+  stats       Json?
+  /// capped list of { ref, message } validation/processing errors
+  errors      Json?
+  /// per-stage timing + counters: [{ stage, ms, in, out }]
+  stages      Json?
+  /// true for a dry run ("plan"): changeset computed, nothing written
+  dryRun      Boolean    @default(false)
+  /// true when this run established the first snapshot of the catalog
+  isBaseline  Boolean    @default(false)
+
+  changes ChangeEvent[]
+
+  @@index([sourceId, startedAt])
+}
+
+enum ChangeKind {
+  MODEL_ADDED
+  MODEL_REMOVED
+  MODEL_UPDATED // spec change: context, max output, modalities, status
+  OFFERING_ADDED
+  OFFERING_REMOVED
+  PRICE_CHANGED
+  BENCHMARK_CHANGED
+}
+
+/// Append-only ledger of observed changes in the ecosystem, produced by the
+/// diff stage of the Atlas Engine. Never written on a baseline run.
+model ChangeEvent {
+  id         String       @id @default(cuid())
+  jobId      String
+  job        IngestionJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  kind       ChangeKind
+  modelId    String?
+  model      Model?       @relation(fields: [modelId], references: [id], onDelete: SetNull)
+  /// stable human-readable subject, survives model deletion ("openai/gpt-4o")
+  subject    String
+  field      String?
+  before     Json?
+  after      Json?
+  createdAt  DateTime     @default(now())
+
+  @@index([createdAt])
+  @@index([modelId, createdAt])
+  @@index([kind, createdAt])
+}
+
+// ─────────────────────────── Layer 1: Registry ───────────────────────────
+
+model Lab {
+  id           String        @id @default(cuid())
+  slug         String        @unique
+  name         String
+  description  String?
+  website      String?
+  headquarters String?
+  foundedYear  Int?
+  /// true when description/website were curated by hand, false when only inferred from model ids
+  isCurated    Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  models    Model[]
+  families  ModelFamily[]
+  providers Provider[] // first-party API platforms run by this lab
+}
+
+model ModelFamily {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  labId     String
+  lab       Lab      @relation(fields: [labId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  models Model[]
+
+  @@unique([labId, name])
+}
+
+enum ModelType {
+  CHAT
+  REASONING
+  MULTIMODAL
+  IMAGE_GENERATION
+  AUDIO
+  VIDEO
+  EMBEDDING
+  ROUTER
+}
+
+enum ModelStatus {
+  ACTIVE
+  DEPRECATED // has a published expiration date in the past
+  ALIAS // moving pointer (e.g. "-latest") to another model
+  REMOVED // no longer returned by the source
+}
+
+model Model {
+  id                 String      @id @default(cuid())
+  slug               String      @unique
+  /// identifier at the source, e.g. "anthropic/claude-sonnet-4.5"
+  externalId         String      @unique
+  canonicalSlug      String?
+  name               String // e.g. "Claude Sonnet 4.5" (lab prefix stripped)
+  description        String?
+  labId              String
+  lab                Lab         @relation(fields: [labId], references: [id])
+  familyId           String?
+  family             ModelFamily? @relation(fields: [familyId], references: [id], onDelete: SetNull)
+  type               ModelType   @default(CHAT)
+  status             ModelStatus @default(ACTIVE)
+  aliasTargetSlug    String?
+  releasedAt         DateTime?
+  contextLength      Int?
+  maxOutputTokens    Int?
+  tokenizer          String?
+  huggingFaceId      String?
+  isOpenWeights      Boolean     @default(false)
+  knowledgeCutoff    String?
+  expiresAt          DateTime?
+  reasoningMandatory Boolean     @default(false)
+  supportedParams    String[]
+  /// denormalized from offerings for fast sorting/filtering; null = unknown
+  minInputPrice      Decimal?    @db.Decimal(18, 6)
+  minOutputPrice     Decimal?    @db.Decimal(18, 6)
+  /// 3:1 input:output blended USD / 1M tokens at the cheapest offering
+  blendedPrice       Decimal?    @db.Decimal(18, 6)
+  isFree             Boolean     @default(false)
+  providerCount      Int         @default(0)
+  sourceId           String
+  source             DataSource  @relation(fields: [sourceId], references: [id])
+  firstSeenAt        DateTime    @default(now())
+  lastSyncedAt       DateTime    @default(now())
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  modalities   ModelModality[]
+  capabilities ModelCapability[]
+  offerings    Offering[]
+  results      BenchmarkResult[]
+  score        ModelScore?
+  changes      ChangeEvent[]
+
+  @@index([labId])
+  @@index([familyId])
+  @@index([type, status])
+  @@index([releasedAt])
+  @@index([contextLength])
+  @@index([blendedPrice])
+  @@index([minInputPrice])
+  @@index([minOutputPrice])
+  @@index([name])
+}
+
+model Modality {
+  id     String          @id @default(cuid())
+  slug   String          @unique // text | image | audio | video | file
+  name   String
+  models ModelModality[]
+}
+
+enum Direction {
+  INPUT
+  OUTPUT
+}
+
+model ModelModality {
+  modelId    String
+  model      Model     @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  modalityId String
+  modality   Modality  @relation(fields: [modalityId], references: [id], onDelete: Cascade)
+  direction  Direction
+
+  @@id([modelId, modalityId, direction])
+  @@index([modalityId, direction])
+}
+
+model Capability {
+  id          String            @id @default(cuid())
+  slug        String            @unique // tools | reasoning | structured-outputs | vision | ...
+  name        String
+  description String
+  models      ModelCapability[]
+}
+
+model ModelCapability {
+  modelId      String
+  model        Model      @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  capabilityId String
+  capability   Capability @relation(fields: [capabilityId], references: [id], onDelete: Cascade)
+  /// how this was established, e.g. "supported_parameters:tools"
+  evidence     String
+
+  @@id([modelId, capabilityId])
+  @@index([capabilityId])
+}
+
+// ─────────────────────────── Layer 2: Provider intelligence ───────────────────────────
+
+model Provider {
+  id               String     @id @default(cuid())
+  slug             String     @unique
+  name             String
+  website          String?
+  headquarters     String?
+  datacenters      String[]
+  privacyPolicyUrl String?
+  termsUrl         String?
+  statusPageUrl    String?
+  /// set when the provider is the first-party API of a lab (e.g. Anthropic)
+  labId            String?
+  lab              Lab?       @relation(fields: [labId], references: [id], onDelete: SetNull)
+  offeringCount    Int        @default(0)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  offerings Offering[]
+}
+
+/// A model as served by one provider endpoint. Same model identity, different terms.
+model Offering {
+  id                      String     @id @default(cuid())
+  modelId                 String
+  model                   Model      @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  providerId              String
+  provider                Provider   @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  /// endpoint tag at source, e.g. "deepinfra/turbo"; unique per model
+  tag                     String
+  contextLength           Int?
+  maxOutputTokens         Int?
+  maxPromptTokens         Int?
+  quantization            String?
+  /// source health status: 0 ok, negative = degraded
+  sourceStatus            Int?
+  uptime1d                Float?
+  supportsImplicitCaching Boolean    @default(false)
+  supportedParams         String[]
+  isActive                Boolean    @default(true)
+  lastSeenAt              DateTime   @default(now())
+  createdAt               DateTime   @default(now())
+  updatedAt               DateTime   @updatedAt
+
+  prices    Price[]
+  snapshots PriceSnapshot[]
+
+  @@unique([modelId, tag])
+  @@index([providerId])
+}
+
+// ─────────────────────────── Layer 3: Pricing intelligence ───────────────────────────
+
+enum PriceComponent {
+  INPUT
+  OUTPUT
+  CACHE_READ
+  CACHE_WRITE
+  REASONING
+  IMAGE_INPUT
+  AUDIO_INPUT
+  IMAGE_OUTPUT
+  AUDIO_OUTPUT
+  WEB_SEARCH
+  REQUEST
+}
+
+enum PriceUnit {
+  PER_MILLION_TOKENS
+  PER_IMAGE
+  PER_SEARCH
+  PER_REQUEST
+  PER_MILLION_UNITS // audio etc. where the source quotes per-unit
+}
+
+/// A row exists only when the source states a price.
+/// No row  -> unavailable/unknown (never treated as zero).
+/// amount 0 -> genuinely free.
+/// isVariable -> source reports a dynamic price (routers), amount is null.
+model Price {
+  id                 String         @id @default(cuid())
+  offeringId         String
+  offering           Offering       @relation(fields: [offeringId], references: [id], onDelete: Cascade)
+  component          PriceComponent
+  unit               PriceUnit
+  amountUsd          Decimal?       @db.Decimal(18, 6)
+  isVariable         Boolean        @default(false)
+  /// pricing tier threshold (long-context tiers); 0 = base tier
+  minPromptTokens    Int            @default(0)
+  discount           Float?
+  updatedAt          DateTime       @updatedAt
+
+  @@unique([offeringId, component, minPromptTokens])
+  @@index([component, amountUsd])
+}
+
+/// Append-only history. A row is written only when an ingest observes a change.
+model PriceSnapshot {
+  id         String         @id @default(cuid())
+  offeringId String
+  offering   Offering       @relation(fields: [offeringId], references: [id], onDelete: Cascade)
+  component  PriceComponent
+  amountUsd  Decimal?       @db.Decimal(18, 6)
+  capturedAt DateTime       @default(now())
+
+  @@index([offeringId, component, capturedAt])
+}
+
+// ─────────────────────────── Layer 4: Benchmark intelligence ───────────────────────────
+
+model Benchmark {
+  id             String            @id @default(cuid())
+  slug           String            @unique
+  name           String
+  category       String // intelligence | coding | agentic | domain | design
+  description    String
+  scaleMin       Float
+  scaleMax       Float?
+  scaleLabel     String // "Index 0–100", "Elo rating"
+  higherIsBetter Boolean           @default(true)
+  methodologyUrl String?
+  /// synthetic/demo benchmarks must be flagged; none are seeded by default
+  isSynthetic    Boolean           @default(false)
+  sourceId       String
+  source         DataSource        @relation(fields: [sourceId], references: [id])
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  results BenchmarkResult[]
+
+  @@index([category])
+}
+
+model BenchmarkResult {
+  id          String     @id @default(cuid())
+  benchmarkId String
+  benchmark   Benchmark  @relation(fields: [benchmarkId], references: [id], onDelete: Cascade)
+  modelId     String
+  model       Model      @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  score       Float
+  /// percentile of this score among all models on the same benchmark (0–1)
+  percentile  Float?
+  /// rank reported by the source, when it reports one
+  sourceRank  Int?
+  extra       Json?
+  /// date the value was observed at the source by our ingestion
+  observedAt  DateTime
+  sourceId    String
+  source      DataSource @relation(fields: [sourceId], references: [id])
+
+  @@unique([benchmarkId, modelId])
+  @@index([modelId])
+  @@index([benchmarkId, score])
+}
+
+// ─────────────────────────── Layer 5: Atlas Intelligence Score ───────────────────────────
+
+/// Materialized per-dimension scores (0–100, null = insufficient data).
+/// Custom weightings are recomputed on read from these columns.
+model ModelScore {
+  modelId           String   @id
+  model             Model    @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  methodology       String // e.g. "atlas-v1"
+  overall           Float?
+  confidence        Float // share of weight backed by data, 0–1
+  capability        Float?
+  coding            Float?
+  agentic           Float?
+  costEfficiency    Float?
+  value             Float?
+  context           Float?
+  availability      Float?
+  versatility       Float?
+  computedAt        DateTime @default(now())
+
+  @@index([overall])
+  @@index([value])
+}

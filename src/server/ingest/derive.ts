@@ -1,0 +1,134 @@
+/**
+ * Derive stage: recompute everything OneAtlas calculates from source data.
+ *  - per-model price aggregates (cheapest offering, blended price, free flag)
+ *  - provider counts
+ *  - per-benchmark percentiles
+ *  - Atlas Intelligence Score dimensions (materialized in ModelScore)
+ * Idempotent: can be re-run at any time (`npm run derive`).
+ */
+import type { PrismaClient } from "@prisma/client";
+import { blendedPrice } from "./normalize";
+import { composite, METHODOLOGY, percentile, scoreModel, type Population, type ScoreInput } from "../scoring/engine";
+
+const asc = (xs: number[]) => [...xs].sort((a, b) => a - b);
+
+export async function deriveAll(db: PrismaClient): Promise<{ scored: number; percentiles: number }> {
+  const models = await db.model.findMany({
+    where: { status: { not: "REMOVED" } },
+    select: {
+      id: true,
+      contextLength: true,
+      offerings: {
+        where: { isActive: true },
+        select: { uptime1d: true, prices: { where: { minPromptTokens: 0, component: { in: ["INPUT", "OUTPUT"] } } } },
+      },
+      modalities: { where: { direction: "INPUT" }, select: { modality: { select: { slug: true } } } },
+      capabilities: { select: { capability: { select: { slug: true } } } },
+      results: { select: { score: true, benchmark: { select: { slug: true } } } },
+    },
+  });
+
+  // ── price aggregates ──
+  type Agg = { minIn: number | null; minOut: number | null; blended: number | null; free: boolean; providers: number; uptime: number | null };
+  const aggs = new Map<string, Agg>();
+  for (const m of models) {
+    let minIn: number | null = null;
+    let minOut: number | null = null;
+    let best: number | null = null;
+    let free = false;
+    let uptime: number | null = null;
+    for (const o of m.offerings) {
+      const inp = o.prices.find((p) => p.component === "INPUT" && !p.isVariable);
+      const out = o.prices.find((p) => p.component === "OUTPUT" && !p.isVariable);
+      const i = inp?.amountUsd == null ? null : Number(inp.amountUsd);
+      const ou = out?.amountUsd == null ? null : Number(out.amountUsd);
+      if (i != null) minIn = minIn == null ? i : Math.min(minIn, i);
+      if (ou != null) minOut = minOut == null ? ou : Math.min(minOut, ou);
+      const b = blendedPrice(i, ou);
+      if (b != null) best = best == null ? b : Math.min(best, b);
+      if (i === 0 && ou === 0) free = true;
+      if (o.uptime1d != null) uptime = uptime == null ? o.uptime1d : Math.max(uptime, o.uptime1d);
+    }
+    aggs.set(m.id, { minIn, minOut, blended: best, free, providers: m.offerings.length, uptime });
+  }
+
+  // ── benchmark percentiles ──
+  const benchmarks = await db.benchmark.findMany({ select: { id: true, higherIsBetter: true, results: { select: { id: true, score: true } } } });
+  let percentiles = 0;
+  const updates = [];
+  for (const b of benchmarks) {
+    const sorted = asc(b.results.map((r) => r.score));
+    for (const r of b.results) {
+      const pct = percentile(sorted, r.score) / 100;
+      updates.push(db.benchmarkResult.update({ where: { id: r.id }, data: { percentile: b.higherIsBetter ? pct : 1 - pct } }));
+      percentiles++;
+    }
+  }
+  for (let i = 0; i < updates.length; i += 400) await db.$transaction(updates.slice(i, i + 400));
+
+  // ── population for scoring ──
+  const bench = (m: (typeof models)[number], slug: string) => m.results.find((r) => r.benchmark.slug === slug)?.score ?? null;
+  const pop: Population = {
+    intelligence: asc(models.map((m) => bench(m, "aa-intelligence-index")).filter((x): x is number => x != null)),
+    coding: asc(models.map((m) => bench(m, "aa-coding-index")).filter((x): x is number => x != null)),
+    agentic: asc(models.map((m) => bench(m, "aa-agentic-index")).filter((x): x is number => x != null)),
+    codeArena: asc(models.map((m) => bench(m, "design-arena-codecategories")).filter((x): x is number => x != null)),
+    prices: asc([...aggs.values()].map((a) => a.blended).filter((x): x is number => x != null && x > 0)),
+  };
+
+  const writes = [];
+  for (const m of models) {
+    const a = aggs.get(m.id)!;
+    const input: ScoreInput = {
+      intelligenceIndex: bench(m, "aa-intelligence-index"),
+      codingIndex: bench(m, "aa-coding-index"),
+      agenticIndex: bench(m, "aa-agentic-index"),
+      codeArenaElo: bench(m, "design-arena-codecategories"),
+      blendedPrice: a.blended,
+      isFree: a.free,
+      contextLength: m.contextLength,
+      providerCount: a.providers,
+      bestUptime: a.uptime,
+      inputModalities: m.modalities.map((x) => x.modality.slug),
+      capabilities: m.capabilities.map((x) => x.capability.slug),
+    };
+    const { dimensions } = scoreModel(input, pop);
+    const comp = composite(dimensions);
+    writes.push(
+      db.model.update({
+        where: { id: m.id },
+        data: { minInputPrice: a.minIn, minOutputPrice: a.minOut, blendedPrice: a.blended, isFree: a.free, providerCount: a.providers },
+      }),
+      db.modelScore.upsert({
+        where: { modelId: m.id },
+        create: { modelId: m.id, methodology: METHODOLOGY, overall: comp.overall, confidence: comp.confidence, ...dimensions },
+        update: { methodology: METHODOLOGY, overall: comp.overall, confidence: comp.confidence, ...dimensions, computedAt: new Date() },
+      }),
+    );
+  }
+  for (let i = 0; i < writes.length; i += 300) await db.$transaction(writes.slice(i, i + 300));
+
+  // ── provider offering counts ──
+  const counts = await db.offering.groupBy({ by: ["providerId"], where: { isActive: true, model: { status: { not: "REMOVED" } } }, _count: true });
+  await db.provider.updateMany({ data: { offeringCount: 0 } });
+  await db.$transaction(counts.map((c) => db.provider.update({ where: { id: c.providerId }, data: { offeringCount: c._count } })));
+
+  return { scored: models.length, percentiles };
+}
+
+/** Build the score input + population for a single model on demand (for traces). */
+export async function loadPopulation(db: PrismaClient): Promise<Population> {
+  const rows = await db.benchmarkResult.findMany({
+    where: { benchmark: { slug: { in: ["aa-intelligence-index", "aa-coding-index", "aa-agentic-index", "design-arena-codecategories"] } }, model: { status: { not: "REMOVED" } } },
+    select: { score: true, benchmark: { select: { slug: true } } },
+  });
+  const pick = (slug: string) => asc(rows.filter((r) => r.benchmark.slug === slug).map((r) => r.score));
+  const prices = await db.model.findMany({ where: { status: { not: "REMOVED" }, blendedPrice: { gt: 0 } }, select: { blendedPrice: true } });
+  return {
+    intelligence: pick("aa-intelligence-index"),
+    coding: pick("aa-coding-index"),
+    agentic: pick("aa-agentic-index"),
+    codeArena: pick("design-arena-codecategories"),
+    prices: asc(prices.map((p) => Number(p.blendedPrice))),
+  };
+}
