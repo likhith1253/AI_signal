@@ -23,7 +23,7 @@ export function Container({ children, className }: { children: React.ReactNode; 
 
 export function Panel({ children, className, title, action, id, flush }: { children: React.ReactNode; className?: string; title?: React.ReactNode; action?: React.ReactNode; id?: string; flush?: boolean }) {
   return (
-    <section id={id} className={cn("rounded-lg border border-line bg-surface", className)}>
+    <section id={id} className={cn("min-w-0 rounded-lg border border-line bg-surface", className)}>
       {title && (
         <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
           <h2 className="text-[13px] font-medium text-ink">{title}</h2>

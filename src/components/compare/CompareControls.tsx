@@ -22,9 +22,14 @@ export function CompareSync({ resolved }: { resolved: { slug: string; name: stri
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // when the store changes elsewhere (tray, remove buttons), reflect it in the URL
+  // when the store changes elsewhere (tray, remove buttons), reflect it in the URL.
+  // Skip the mount commit: the store is still empty then and would wipe a shared link.
+  const synced = useRef(false);
   useEffect(() => {
-    if (first.current) return;
+    if (!synced.current) {
+      synced.current = true;
+      return;
+    }
     const next = store.map((i) => i.slug).join(",");
     if (next !== urlModels.join(",")) router.replace(next ? `/compare?models=${next}` : "/compare", { scroll: false });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -124,13 +129,17 @@ export function RemoveModel({ slug, name }: { slug: string; name: string }) {
 export function DiffToggle() {
   const router = useRouter();
   const sp = useSearchParams();
-  const on = sp.get("diff") === "1";
+  const fromUrl = sp.get("diff") === "1";
+  // optimistic: the checkbox flips immediately, the URL catches up
+  const [on, setOn] = useState(fromUrl);
+  useEffect(() => setOn(fromUrl), [fromUrl]);
   return (
     <label className="flex cursor-pointer items-center gap-2 text-[13px] text-ink-2">
       <input
         type="checkbox"
         checked={on}
         onChange={(e) => {
+          setOn(e.target.checked);
           const next = new URLSearchParams(sp.toString());
           if (e.target.checked) next.set("diff", "1");
           else next.delete("diff");

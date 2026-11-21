@@ -6,7 +6,7 @@ import "./globals.css";
 
 const sans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-plex-sans", display: "swap" });
 const mono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-plex-mono", display: "swap" });
-const display = Newsreader({ subsets: ["latin"], style: ["normal", "italic"], weight: ["400", "500", "600"], variable: "--font-newsreader", display: "swap" });
+const display = Newsreader({ subsets: ["latin"], style: ["normal", "italic"], variable: "--font-newsreader", display: "swap" });
 
 export const metadata: Metadata = {
   title: { default: "OneAtlas — intelligence layer for the AI model ecosystem", template: "%s · OneAtlas" },

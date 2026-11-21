@@ -1,19 +1,24 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { modelListQuery, searchParamsToObject } from "@/lib/validation";
+import { modelListQuery, searchParamsToObject, type ModelListQuery } from "@/lib/validation";
 import { getModelFacets, listModels } from "@/server/queries/models";
 import { PageHeader, Container } from "@/components/ui/primitives";
 import { FilterControls, MobileFilters, SearchBox } from "@/components/models/FilterPanel";
 import { ActiveFilters, ModelResults } from "@/components/models/ModelResults";
+import { ResultsSkeleton } from "@/components/ui/Skeletons";
 
 export const metadata: Metadata = { title: "Models", description: "Search, filter and sort every model in the OneAtlas registry." };
-export const revalidate = 300;
+
+async function Results({ q }: { q: ModelListQuery }) {
+  const result = await listModels(q);
+  return <ModelResults items={result.items} total={result.total} page={result.page} pageCount={result.pageCount} sort={q.sort} />;
+}
 
 export default async function ModelsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const raw = searchParamsToObject(await searchParams);
   const parsed = modelListQuery.safeParse(raw);
   const q = parsed.success ? parsed.data : modelListQuery.parse({});
-  const [result, facets] = await Promise.all([listModels(q), getModelFacets()]);
+  const facets = await getModelFacets();
   const labels: Record<string, string> = {};
   for (const l of facets.labs) labels[`lab:${l.value}`] = l.label;
   for (const p of facets.providers) labels[`provider:${p.value}`] = p.label;
@@ -24,11 +29,7 @@ export default async function ModelsPage({ searchParams }: { searchParams: Promi
       <PageHeader
         eyebrow="Model registry"
         title="Discover models"
-        description={
-          <>
-            One identity per model, regardless of how many providers serve it. Prices shown are the cheapest active offering; blended price uses a 3:1 input:output mix.
-          </>
-        }
+        description="One identity per model, regardless of how many providers serve it. Prices shown are the cheapest active offering; blended price uses a 3:1 input:output mix."
       />
       <Container className="py-6">
         <div className="grid gap-6 lg:grid-cols-[248px_minmax(0,1fr)]">
@@ -51,8 +52,9 @@ export default async function ModelsPage({ searchParams }: { searchParams: Promi
                 <ActiveFilters labels={labels} />
               </Suspense>
             </div>
-            <Suspense>
-              <ModelResults items={result.items} total={result.total} page={result.page} pageCount={result.pageCount} sort={q.sort} />
+            {/* streams in on first load; filter changes keep the current list visible (transition) and dim it */}
+            <Suspense fallback={<ResultsSkeleton />}>
+              <Results q={q} />
             </Suspense>
           </div>
         </div>

@@ -170,7 +170,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         <div className="flex min-w-0 flex-1 flex-col">
           <TopBar onMenu={() => setDrawer(true)} />
-          <main className="min-w-0 flex-1">{children}</main>
+          <main className="min-w-0 flex-1">
+            {/* route transition keyed by pathname only, so filter/search-param updates don't remount the page */}
+            <motion.div key={pathname} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}>
+              {children}
+            </motion.div>
+          </main>
           <footer className="border-t border-line px-4 py-6 text-[12px] text-ink-3 md:px-8">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <span>
