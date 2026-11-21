@@ -71,7 +71,7 @@ export function AddModel({ disabled }: { disabled?: boolean }) {
       <button
         disabled={disabled}
         onClick={() => setOpen((o) => !o)}
-        className="flex h-full min-h-[120px] w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-line-strong text-[13px] text-ink-2 transition-colors hover:border-ink-3 hover:bg-surface disabled:opacity-40"
+        className="flex h-full min-h-[120px] w-full flex-col items-center justify-center gap-2 rounded-none border border-dashed border-line-strong text-[13px] text-ink-2 transition-colors hover:border-ink-3 hover:bg-surface disabled:opacity-40"
         data-testid="compare-add"
       >
         <Plus size={18} />
@@ -79,7 +79,7 @@ export function AddModel({ disabled }: { disabled?: boolean }) {
       </button>
       <AnimatePresence>
         {open && (
-          <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} className="absolute left-0 right-0 top-2 z-30 min-w-[260px] rounded-lg border border-line-strong bg-surface shadow-[var(--shadow)]">
+          <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} className="absolute left-0 right-0 top-2 z-30 min-w-[260px] rounded-none border border-line-strong bg-surface shadow-[var(--shadow)]">
             <div className="flex items-center gap-2 border-b border-line px-3">
               <Search size={14} className="text-ink-3" />
               <input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search models…" className="h-10 flex-1 bg-transparent text-[13.5px] outline-none" data-testid="compare-search" />
@@ -99,7 +99,7 @@ export function AddModel({ disabled }: { disabled?: boolean }) {
                         setOpen(false);
                         setQ("");
                       }}
-                      className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] hover:bg-surface-2 disabled:opacity-40"
+                      className="flex w-full items-center gap-2 rounded-none px-2 py-1.5 text-left text-[13px] hover:bg-surface-2 disabled:opacity-40"
                     >
                       <LabMark slug={h.lab.slug} size={20} />
                       <span className="flex-1 truncate text-ink">{h.name}</span>

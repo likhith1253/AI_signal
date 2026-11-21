@@ -16,7 +16,7 @@ const count = async (t: string) => Number(t.replace(/[^\d]/g, ""));
 test.describe("navigation", () => {
   test("home communicates purpose and every sidebar link resolves", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("intelligence layer");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("terrain of");
     const sidebar = page.getByTestId("sidebar");
     for (const label of ["Models", "Workload finder", "Compare", "Rankings", "Benchmarks", "Ecosystem", "AI labs", "Providers", "Atlas Engine", "Methodology", "Overview"]) {
       await (await hydrated(sidebar.getByRole("link", { name: label, exact: true }))).click();
@@ -79,7 +79,9 @@ test.describe("model discovery", () => {
     await page.goto("/models");
     await (await hydrated(page.getByTestId("sort-select"))).selectOption("input");
     await expect(page).toHaveURL(/sort=input/);
-    await page.getByTestId("next-page").click();
+    await expect(page.getByTestId("result-count")).not.toContainText("updating");
+    await expect(page.getByTestId("model-row").first()).toBeVisible();
+    await (await hydrated(page.getByTestId("next-page"))).click();
     await expect(page).toHaveURL(/page=2/);
     await expect(page.getByTestId("model-row")).toHaveCount(24);
   });
@@ -201,7 +203,7 @@ test.describe("theme", () => {
     await toggle.click(); // -> light
     await toggle.click(); // -> dark
     await expect(html).toHaveClass(/dark/);
-    expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe("rgb(26, 25, 23)");
+    expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe("rgb(20, 17, 13)");
     await page.reload();
     await expect(html).toHaveClass(/dark/);
     await page.goto("/models");

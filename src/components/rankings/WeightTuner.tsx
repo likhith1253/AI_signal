@@ -45,7 +45,7 @@ export function WeightTuner() {
   }, [w, sp, router]);
 
   return (
-    <div className="rounded-lg border border-line bg-surface p-4" data-testid="weight-tuner">
+    <div className="rounded-none border border-line bg-surface p-4" data-testid="weight-tuner">
       <div className="mb-3 flex items-center justify-between">
         <div>
           <div className="text-[13px] font-medium text-ink">Tune the weights</div>
@@ -57,7 +57,7 @@ export function WeightTuner() {
       </div>
       <div className="flex flex-col gap-2.5">
         {DIMS.map((d) => (
-          <label key={d.key} className="grid grid-cols-[98px_1fr_40px] items-center gap-2 text-[12.5px]">
+          <label key={d.key} className="grid grid-cols-[88px_minmax(0,1fr)_34px] items-center gap-2 text-[12.5px]">
             <span className="text-ink-2">{d.label}</span>
             <input
               type="range"

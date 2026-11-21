@@ -43,13 +43,13 @@ export function PipelineDiagram({ stages, tables }: { stages: StageLog[]; tables
   ] as const;
 
   return (
-    <div className="rounded-lg border border-line bg-surface">
+    <div className="rounded-none border border-line bg-surface">
       <div className="paper-grid overflow-x-auto p-5">
-        <div className="flex min-w-[1080px] justify-between items-stretch gap-0">
+        <div className="flex min-w-[1110px] justify-between items-stretch gap-0">
           {/* sources */}
           <div className="flex w-[122px] shrink-0 flex-col justify-center gap-2 pr-2">
             {["OpenRouter catalogue", "Provider endpoints", "Artificial Analysis", "Design Arena"].map((s) => (
-              <div key={s} className="rounded-[4px] border border-line bg-surface px-2 py-1.5 text-[11px] text-ink-2">
+              <div key={s} className="rounded-none border border-line bg-surface px-2 py-1.5 text-[11px] text-ink-2">
                 {s}
               </div>
             ))}
@@ -68,7 +68,7 @@ export function PipelineDiagram({ stages, tables }: { stages: StageLog[]; tables
                   onMouseLeave={() => setActive(null)}
                   onFocus={() => setActive(name)}
                   onBlur={() => setActive(null)}
-                  className={`relative flex w-[84px] flex-col rounded-md border bg-surface p-2 text-left transition-colors ${active === name ? "border-copper" : "border-line-strong"} ${name === "diff" ? "ring-1 ring-copper/40" : ""}`}
+                  className={`relative flex w-[84px] flex-col rounded-none border bg-surface p-2 text-left transition-colors ${active === name ? "border-copper" : "border-line-strong"} ${name === "diff" ? "ring-1 ring-copper/40" : ""}`}
                   data-testid="pipeline-stage"
                 >
                   <span className="num text-[9.5px] text-ink-3">{String(i + 1).padStart(2, "0")}</span>
@@ -95,12 +95,12 @@ export function PipelineDiagram({ stages, tables }: { stages: StageLog[]; tables
             <Connector delay={2} reduce={!!reduce} />
           </div>
           {/* storage layers */}
-          <div className="flex w-[146px] shrink-0 flex-col justify-center gap-1">
+          <div className="flex w-[176px] shrink-0 flex-col justify-center gap-1">
             {layers.map(([label, n, unit]) => (
-              <div key={label} className="flex items-center justify-between rounded-[4px] border border-line bg-surface px-2 py-1 text-[11px]">
+              <div key={label} className="flex items-center justify-between rounded-none border border-line bg-surface px-2 py-1 text-[11px]">
                 <span className="text-ink-2">{label}</span>
                 <span className="num text-ink">
-                  {n.toLocaleString()} <span className="text-ink-3">{unit}</span>
+                  {n.toLocaleString("en-US")} <span className="text-ink-3">{unit}</span>
                 </span>
               </div>
             ))}

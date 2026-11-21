@@ -49,7 +49,7 @@ export function CountUp({ value, decimals = 0, prefix = "", suffix = "", classNa
   return (
     <span ref={ref} className={className}>
       {prefix}
-      {display.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}
+      {display.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}
       {suffix}
     </span>
   );

@@ -62,32 +62,35 @@ export function ChangeFeed({ items, compact = false }: { items: FeedItem[]; comp
         The ledger is empty. The first ingest establishes a baseline; changes appear from the second run on.
       </div>
     );
+  // field dispatches: numbered like a surveyor's log, one observed change per entry
   return (
-    <ul data-testid="change-feed">
-      {items.map((c) => {
+    <ol data-testid="change-feed">
+      {items.map((c, i) => {
         const k = KIND[c.kind] ?? { label: c.kind, tone: "text-ink-2", glyph: "·" };
         return (
-          <li key={c.id} className="flex gap-3 border-b border-line px-4 py-2.5 last:border-0">
-            <span className={`num mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-[3px] bg-surface-2 text-[11px] ${k.tone}`}>{k.glyph}</span>
-            <div className="min-w-0 flex-1 text-[12.5px]">
+          <li key={c.id} className="grid grid-cols-[34px_minmax(0,1fr)] gap-2 border-b border-dashed border-line-strong px-3 py-2 last:border-0">
+            <span className="num pt-[1px] text-[10px] text-ink-3">{String(items.length - i).padStart(3, "0")}</span>
+            <div className="min-w-0 text-[12.5px]">
               <div className="flex items-baseline justify-between gap-2">
                 <span className="truncate">
-                  <span className={`${k.tone} mr-1.5 text-[11px] uppercase tracking-[0.06em]`}>{k.label}</span>
+                  <span className={`num mr-1.5 text-[10px] uppercase ${k.tone}`}>
+                    {k.glyph} {k.label}
+                  </span>
                   {c.model ? (
-                    <Link href={`/models/${c.model.slug}`} className="text-ink hover:underline">
+                    <Link href={`/models/${c.model.slug}`} className="font-medium text-ink underline decoration-line-strong underline-offset-2 hover:decoration-copper">
                       {c.model.name}
                     </Link>
                   ) : (
                     <span className="num text-ink">{c.subject}</span>
                   )}
                 </span>
-                <span className="shrink-0 text-[11px] text-ink-3">{fmtRelative(c.at)}</span>
+                <span className="num shrink-0 text-[10px] text-ink-3">{fmtRelative(c.at)}</span>
               </div>
-              {!compact && <div className="mt-0.5 truncate text-ink-2">{describe(c)}</div>}
+              {!compact && <div className="num mt-0.5 truncate text-[11px] text-ink-2">{describe(c)}</div>}
             </div>
           </li>
         );
       })}
-    </ul>
+    </ol>
   );
 }

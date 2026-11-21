@@ -48,7 +48,7 @@ export function ActiveFilters({ labels }: { labels: Record<string, string> }) {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             onClick={() => (c.value ? update({ [c.key]: getList(c.key).filter((x) => x !== c.value) }) : update({ [c.key]: null }))}
-            className="group inline-flex h-6 items-center gap-1 rounded-[4px] border border-line-strong bg-surface pl-2 pr-1 text-[12px] text-ink"
+            className="group inline-flex h-6 items-center gap-1 rounded-none border border-line-strong bg-surface pl-2 pr-1 text-[12px] text-ink"
           >
             {c.label}
             <X size={11} className="text-ink-3 group-hover:text-ink" />
@@ -86,11 +86,11 @@ export function ModelResults({ items, total, page, pageCount, sort }: { items: M
     <div className={cn("transition-opacity", pending && "opacity-60")} aria-busy={pending}>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div className="text-[13px] text-ink-2" data-testid="result-count">
-          <span className="num text-ink">{total.toLocaleString()}</span> {total === 1 ? "model" : "models"}
+          <span className="num text-ink">{total.toLocaleString("en-US")}</span> {total === 1 ? "model" : "models"}
           {pending && <span className="ml-2 text-ink-3">updating…</span>}
         </div>
         <div className="flex items-center gap-2">
-          <label className="flex h-8 items-center gap-1.5 rounded-md border border-line bg-surface px-2 text-[12.5px] text-ink-2">
+          <label className="flex h-8 items-center gap-1.5 rounded-none border border-line bg-surface px-2 text-[12.5px] text-ink-2">
             <ArrowDownUp size={13} />
             <span className="sr-only">Sort by</span>
             <select value={sort} onChange={(e) => update({ sort: e.target.value === "score" ? null : e.target.value })} className="bg-transparent text-ink outline-none" data-testid="sort-select">
@@ -101,9 +101,9 @@ export function ModelResults({ items, total, page, pageCount, sort }: { items: M
               ))}
             </select>
           </label>
-          <div className="flex h-8 rounded-md border border-line bg-surface p-0.5">
+          <div className="flex h-8 rounded-none border border-line bg-surface p-0.5">
             {(["table", "grid"] as const).map((v) => (
-              <button key={v} onClick={() => setV(v)} className={cn("flex w-7 items-center justify-center rounded-[4px]", view === v ? "bg-surface-3 text-ink" : "text-ink-3")} aria-label={`${v} view`} aria-pressed={view === v}>
+              <button key={v} onClick={() => setV(v)} className={cn("flex w-7 items-center justify-center rounded-none", view === v ? "bg-surface-3 text-ink" : "text-ink-3")} aria-label={`${v} view`} aria-pressed={view === v}>
                 {v === "table" ? <Rows3 size={14} /> : <LayoutGrid size={14} />}
               </button>
             ))}
@@ -112,12 +112,12 @@ export function ModelResults({ items, total, page, pageCount, sort }: { items: M
       </div>
 
       {items.length === 0 ? (
-        <div className="rounded-lg border border-line bg-surface">
+        <div className="rounded-none border border-line bg-surface">
           <EmptyState
             title="No models match these filters"
             body="Loosen a constraint — price ceilings and capability combinations narrow results fastest."
             action={
-              <button onClick={() => update({ type: null, capability: null, modality: null, lab: null, provider: null, q: null, maxPrice: null, minContext: null, free: null, openWeights: null })} className="rounded-md border border-line-strong px-3 py-1.5 text-[13px] hover:bg-surface-2">
+              <button onClick={() => update({ type: null, capability: null, modality: null, lab: null, provider: null, q: null, maxPrice: null, minContext: null, free: null, openWeights: null })} className="rounded-none border border-line-strong px-3 py-1.5 text-[13px] hover:bg-surface-2">
                 Reset filters
               </button>
             }
@@ -131,13 +131,13 @@ export function ModelResults({ items, total, page, pageCount, sort }: { items: M
 
       {pageCount > 1 && (
         <div className="mt-4 flex items-center justify-between text-[13px]">
-          <button disabled={page <= 1} onClick={() => update({ page: String(page - 1) }, { resetPage: false })} className="flex h-8 items-center gap-1 rounded-md border border-line bg-surface px-3 text-ink disabled:opacity-40" data-testid="prev-page">
+          <button disabled={page <= 1} onClick={() => update({ page: String(page - 1) }, { resetPage: false })} className="flex h-8 items-center gap-1 rounded-none border border-line bg-surface px-3 text-ink disabled:opacity-40" data-testid="prev-page">
             <ChevronLeft size={14} /> Previous
           </button>
           <span className="num text-ink-3">
             Page {page} of {pageCount}
           </span>
-          <button disabled={page >= pageCount} onClick={() => update({ page: String(page + 1) }, { resetPage: false })} className="flex h-8 items-center gap-1 rounded-md border border-line bg-surface px-3 text-ink disabled:opacity-40" data-testid="next-page">
+          <button disabled={page >= pageCount} onClick={() => update({ page: String(page + 1) }, { resetPage: false })} className="flex h-8 items-center gap-1 rounded-none border border-line bg-surface px-3 text-ink disabled:opacity-40" data-testid="next-page">
             Next <ChevronRight size={14} />
           </button>
         </div>
@@ -148,8 +148,8 @@ export function ModelResults({ items, total, page, pageCount, sort }: { items: M
 
 function ModelTable({ items }: { items: ModelCard[] }) {
   return (
-    <div className="overflow-hidden rounded-lg border border-line bg-surface">
-      <div className="hidden grid-cols-[minmax(0,1fr)_120px_64px_128px_52px_30px] gap-3 border-b border-line bg-surface-2 px-4 py-2 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ink-3 xl:grid">
+    <div className="overflow-hidden rounded-none border border-line bg-surface">
+      <div className="hidden grid-cols-[minmax(0,1fr)_120px_60px_150px_62px_30px] gap-3 border-b border-line bg-surface-2 px-4 py-2 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ink-3 xl:grid">
         <span>Model</span>
         <span>Price in / out</span>
         <span>Context</span>
@@ -160,7 +160,7 @@ function ModelTable({ items }: { items: ModelCard[] }) {
       <motion.ul initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.018 } } }}>
         {items.map((m) => (
           <motion.li key={m.slug} variants={{ hidden: { opacity: 0, y: 6 }, show: { opacity: 1, y: 0 } }} transition={{ duration: 0.25 }} className="border-b border-line last:border-0">
-            <Link href={`/models/${m.slug}`} className="group grid grid-cols-[1fr_auto] items-center gap-3 px-4 py-3 transition-colors hover:bg-surface-2 xl:grid-cols-[minmax(0,1fr)_120px_64px_128px_52px_30px]" data-testid="model-row">
+            <Link href={`/models/${m.slug}`} className="group grid grid-cols-[1fr_auto] items-center gap-3 px-4 py-3 transition-colors hover:bg-surface-2 xl:grid-cols-[minmax(0,1fr)_120px_60px_150px_62px_30px]" data-testid="model-row">
               <span className="flex min-w-0 items-center gap-3">
                 <LabMark slug={m.lab.slug} name={m.lab.name} size={30} />
                 <span className="min-w-0">
@@ -169,6 +169,7 @@ function ModelTable({ items }: { items: ModelCard[] }) {
                     <TypeTag type={m.type} />
                     <span className="truncate">
                       {m.lab.name} · {m.providerCount} provider{m.providerCount === 1 ? "" : "s"} · {fmtMonth(m.releasedAt)}
+                      {m.gridRef && <span className="num text-copper"> · {m.gridRef}</span>}
                     </span>
                   </span>
                 </span>
@@ -206,7 +207,7 @@ function ModelGrid({ items }: { items: ModelCard[] }) {
     <motion.div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.025 } } }}>
       {items.map((m) => (
         <motion.div key={m.slug} variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }}>
-          <Link href={`/models/${m.slug}`} className="group flex h-full flex-col rounded-lg border border-line bg-surface p-4 transition-all hover:-translate-y-0.5 hover:border-line-strong hover:shadow-[var(--shadow)]" data-testid="model-card">
+          <Link href={`/models/${m.slug}`} className="group flex h-full flex-col rounded-none border border-line bg-surface p-4 transition-all hover:-translate-y-0.5 hover:border-line-strong hover:shadow-[var(--shadow)]" data-testid="model-card">
             <div className="flex items-start justify-between gap-3">
               <span className="flex min-w-0 items-center gap-2.5">
                 <LabMark slug={m.lab.slug} size={28} />

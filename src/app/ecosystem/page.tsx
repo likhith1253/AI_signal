@@ -13,7 +13,7 @@ export default async function EcosystemPage() {
   const max = Math.max(...e.matrix.flat().map((c) => c.n), 1);
   return (
     <>
-      <PageHeader
+      <PageHeader sheet="07"
         eyebrow="Ecosystem explorer"
         title="Who builds, who serves"
         description={`${e.totals.pairs} lab–provider relationships across ${e.totals.labs} labs and ${e.totals.providers} providers. Labs train models; providers decide where, how fast and at what price you can run them.`}
@@ -47,7 +47,7 @@ export default async function EcosystemPage() {
                     {e.matrix[li].map((c, pi) => (
                       <td key={pi} className="p-0">
                         <div
-                          className="num flex h-[30px] w-[34px] items-center justify-center rounded-[3px] text-[10.5px]"
+                          className="num flex h-[30px] w-[34px] items-center justify-center rounded-none text-[10.5px]"
                           style={{
                             background: c.n ? `color-mix(in oklab, var(--accent) ${Math.round(12 + (c.n / max) * 78)}%, var(--surface))` : "var(--surface-2)",
                             color: c.n / max > 0.45 ? "var(--accent-ink)" : "var(--ink-2)",
@@ -94,8 +94,8 @@ export default async function EcosystemPage() {
                     {e.coverage[li].map((v, ci) => (
                       <td key={ci} className="py-2 pr-3">
                         <div className="flex items-center gap-2">
-                          <span className="h-[6px] w-full max-w-[90px] overflow-hidden rounded-[2px] bg-surface-3">
-                            <span className="block h-full rounded-[2px] bg-copper" style={{ width: `${v * 100}%` }} />
+                          <span className="h-[6px] w-full max-w-[90px] overflow-hidden rounded-none bg-surface-3">
+                            <span className="block h-full rounded-none bg-copper" style={{ width: `${v * 100}%` }} />
                           </span>
                           <span className="num w-8 text-right text-ink-2">{Math.round(v * 100)}%</span>
                         </div>

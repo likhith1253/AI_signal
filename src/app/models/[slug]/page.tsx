@@ -3,6 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowUpRight, Database, History } from "lucide-react";
 import { getModel } from "@/server/queries/models";
+import { getLandscape } from "@/server/queries/intelligence";
+import { TopoMap } from "@/components/charts/TopoMap";
+import { gridRef, regionName } from "@/lib/gridref";
 import { Container, Meter, Panel, Stat, Tag } from "@/components/ui/primitives";
 import { LabMark } from "@/components/identity/LabMark";
 import { CapabilityChip, ModalityStrip, ScoreDial, TypeTag } from "@/components/models/bits";
@@ -27,8 +30,11 @@ const CATEGORY_LABEL: Record<string, string> = { intelligence: "Intelligence", c
 
 export default async function ModelPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const m = await getModel(slug);
+  const [m, landscape] = await Promise.all([getModel(slug), getLandscape()]);
   if (!m) notFound();
+  const intel = m.benchmarks.find((b) => b.slug === "aa-intelligence-index")?.score ?? null;
+  const ref = gridRef(m.pricing.blended, intel);
+  const region = ref && intel != null && m.pricing.blended ? regionName(m.pricing.blended, intel) : null;
 
   const active = m.offerings.filter((o) => o.isActive);
   const firstParty = active.find((o) => o.provider.firstParty);
@@ -67,20 +73,29 @@ export default async function ModelPage({ params }: { params: Promise<{ slug: st
                   {m.pricing.isFree && <Tag tone="positive">Free tier</Tag>}
                   <span className="text-[12.5px] text-ink-3">Released {fmtDate(m.releasedAt)}</span>
                 </div>
-                <div className="mt-3">
+                <div className="mt-3 flex flex-wrap items-center gap-3">
                   <CopyId value={m.externalId} />
+                  <span className="num text-[11.5px] text-ink-2" data-testid="grid-ref">
+                    {ref ? (
+                      <>
+                        grid ref <span className="text-copper">{ref}</span> · <span className="water text-[13px]">{region}</span>
+                      </>
+                    ) : (
+                      <span className="text-ink-3">unsurveyed: no AA Intelligence Index published</span>
+                    )}
+                  </span>
                 </div>
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-2">
               <CompareButton slug={m.slug} name={m.name} lab={m.lab.slug} variant="full" />
-              <a href={`https://openrouter.ai/${m.externalId}`} target="_blank" rel="noreferrer" className="inline-flex h-8 items-center gap-1 rounded-md border border-line bg-surface px-3 text-[13px] text-ink-2 hover:text-ink">
+              <a href={`https://openrouter.ai/${m.externalId}`} target="_blank" rel="noreferrer" className="inline-flex h-8 items-center gap-1 rounded-none border border-line bg-surface px-3 text-[13px] text-ink-2 hover:text-ink">
                 Source <ArrowUpRight size={13} />
               </a>
             </div>
           </div>
 
-          <div className="mt-7 grid grid-cols-2 gap-x-6 gap-y-5 rounded-lg border border-line bg-surface p-5 sm:grid-cols-3 lg:grid-cols-7">
+          <div className="mt-7 grid grid-cols-2 gap-x-6 gap-y-5 rounded-none border border-line bg-surface p-5 sm:grid-cols-3 lg:grid-cols-7">
             <Stat label="Context" value={fmtTokens(m.contextLength)} sub="tokens" />
             <Stat label="Max output" value={fmtTokens(m.maxOutputTokens)} sub="tokens" />
             <Stat label="Input" value={fmtPrice(m.pricing.input)} sub="cheapest / 1M" />
@@ -116,8 +131,8 @@ export default async function ModelPage({ params }: { params: Promise<{ slug: st
                 </Link>
               }
             >
-              <div className="grid gap-6 md:grid-cols-[260px_minmax(0,1fr)]">
-                <div className="flex flex-col items-center">
+              <div className="grid gap-6 2xl:grid-cols-[260px_minmax(0,1fr)]">
+                <div className="flex flex-col items-center 2xl:items-center">
                   <ScoreWheel dims={m.score.traces.map((t) => ({ key: t.key, label: t.label, score: t.score }))} overall={m.score.overall} />
                   <p className="mt-2 max-w-[250px] text-center text-[11.5px] leading-snug text-ink-3">
                     {m.score.overall == null
@@ -265,6 +280,18 @@ export default async function ModelPage({ params }: { params: Promise<{ slug: st
 
         {/* ── sidebar ── */}
         <aside className="flex flex-col gap-6">
+          <Panel title={ref ? `Locator · ${ref}` : "Locator"} flush>
+            {ref ? (
+              <div className="p-2">
+                <TopoMap points={landscape} compact highlight={m.slug} />
+              </div>
+            ) : (
+              <p className="p-4 text-[12.5px] text-ink-3">
+                Not on the map yet. A station needs a published AA Intelligence Index and a known price to be placed on the datum.
+              </p>
+            )}
+            {ref && <p className="water border-t border-line px-4 py-2 text-[12px] text-ink-3">Ringed: this model, among {landscape.length} surveyed stations.</p>}
+          </Panel>
           <Panel title="Model specification">
             <dl className="flex flex-col gap-3 text-[12.5px]">
               <div className="flex items-center justify-between gap-3">
@@ -276,8 +303,8 @@ export default async function ModelPage({ params }: { params: Promise<{ slug: st
               {[
                 ["Input", m.inputModalities.join(", ") || "—"],
                 ["Output", m.outputModalities.join(", ") || "—"],
-                ["Context window", m.contextLength ? `${m.contextLength.toLocaleString()} tokens` : "—"],
-                ["Max output", m.maxOutputTokens ? `${m.maxOutputTokens.toLocaleString()} tokens` : "—"],
+                ["Context window", m.contextLength ? `${m.contextLength.toLocaleString("en-US")} tokens` : "—"],
+                ["Max output", m.maxOutputTokens ? `${m.maxOutputTokens.toLocaleString("en-US")} tokens` : "—"],
                 ["Tokenizer", m.tokenizer ?? "—"],
                 ["Knowledge cutoff", m.knowledgeCutoff ?? "Not published"],
                 ["Reasoning", m.reasoningMandatory ? "Always on" : m.capabilities.some((c) => c.slug === "reasoning") ? "Optional" : "No"],
@@ -319,7 +346,7 @@ export default async function ModelPage({ params }: { params: Promise<{ slug: st
                 <Expandable label={<span>{m.supportedParams.length} supported API parameters</span>}>
                   <div className="flex flex-wrap gap-1">
                     {m.supportedParams.map((p) => (
-                      <span key={p} className="num rounded-[3px] bg-surface-2 px-1.5 py-0.5 text-[11px] text-ink-2">
+                      <span key={p} className="num rounded-none bg-surface-2 px-1.5 py-0.5 text-[11px] text-ink-2">
                         {p}
                       </span>
                     ))}

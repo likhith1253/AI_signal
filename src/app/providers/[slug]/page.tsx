@@ -52,13 +52,13 @@ export default async function ProviderPage({ params }: { params: Promise<{ slug:
               ]
                 .filter(([, u]) => u)
                 .map(([l, u]) => (
-                  <a key={l} href={u!} target="_blank" rel="noreferrer" className="inline-flex h-8 items-center gap-1 rounded-md border border-line bg-surface px-3 text-[12.5px] text-ink-2 hover:text-ink">
+                  <a key={l} href={u!} target="_blank" rel="noreferrer" className="inline-flex h-8 items-center gap-1 rounded-none border border-line bg-surface px-3 text-[12.5px] text-ink-2 hover:text-ink">
                     {l} <ArrowUpRight size={12} />
                   </a>
                 ))}
             </div>
           </div>
-          <div className="mt-6 grid grid-cols-2 gap-5 rounded-lg border border-line bg-surface p-5 sm:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-5 rounded-none border border-line bg-surface p-5 sm:grid-cols-4">
             <Stat label="Models served" value={p.stats.offerings} />
             <Stat label="From labs" value={p.stats.labs} />
             <Stat label="Cheapest option for" value={p.stats.cheapestCount} sub="models (input price)" />
@@ -71,7 +71,7 @@ export default async function ProviderPage({ params }: { params: Promise<{ slug:
           <h2 className="font-display text-[22px] text-ink">Catalogue</h2>
           <span className="text-[12px] text-ink-3">“vs cheapest” compares this provider’s input price with the cheapest other active provider of the same model.</span>
         </div>
-        <div className="overflow-x-auto rounded-lg border border-line bg-surface">
+        <div className="overflow-x-auto rounded-none border border-line bg-surface">
           <table className="w-full min-w-[820px] text-left text-[12.5px]">
             <thead>
               <tr className="border-b border-line bg-surface-2 text-[10.5px] uppercase tracking-[0.08em] text-ink-3">

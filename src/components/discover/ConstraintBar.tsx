@@ -20,7 +20,7 @@ export function ConstraintBar() {
   const chip = (k: string, v: string | null, label: string) => {
     const on = (sp.get(k) ?? null) === v;
     return (
-      <button key={label} onClick={() => set(k, v)} aria-pressed={on} className={cn("num h-7 rounded-[4px] border px-2 text-[12px]", on ? "border-ink bg-ink text-bg" : "border-line bg-surface text-ink-2 hover:border-line-strong")}>
+      <button key={label} onClick={() => set(k, v)} aria-pressed={on} className={cn("num h-7 rounded-none border px-2 text-[12px]", on ? "border-ink bg-ink text-bg" : "border-line bg-surface text-ink-2 hover:border-line-strong")}>
         {label}
       </button>
     );

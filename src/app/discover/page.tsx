@@ -33,11 +33,11 @@ export default async function DiscoverPage({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <PageHeader eyebrow="Recommendation engine" title="Workload finder" description="Pick the job. OneAtlas applies the workload's hard requirements, weights the Atlas dimensions for that job and explains every pick. Deterministic: same data, same answer." />
+      <PageHeader sheet="03" eyebrow="Recommendation engine" title="Workload finder" description="Pick the job. OneAtlas applies the workload's hard requirements, weights the Atlas dimensions for that job and explains every pick. Deterministic: same data, same answer." />
       <Container className="grid gap-6 py-6 lg:grid-cols-[280px_minmax(0,1fr)]">
         <aside className="flex flex-col gap-1" aria-label="Workloads">
           {WORKLOADS.map((w) => (
-            <Link key={w.slug} href={keep({ workload: w.slug })} className={cn("rounded-md border px-3 py-2.5 transition-colors", w.slug === workload.slug ? "border-line-strong bg-surface shadow-[0_1px_0_var(--line)]" : "border-transparent hover:bg-surface-2")} data-testid="workload-option">
+            <Link key={w.slug} href={keep({ workload: w.slug })} className={cn("rounded-none border px-3 py-2.5 transition-colors", w.slug === workload.slug ? "border-line-strong bg-surface shadow-[0_1px_0_var(--line)]" : "border-transparent hover:bg-surface-2")} data-testid="workload-option">
               <div className={cn("text-[13.5px]", w.slug === workload.slug ? "font-medium text-ink" : "text-ink-2")}>{w.name}</div>
               {w.slug === workload.slug && <div className="mt-0.5 text-[12px] leading-snug text-ink-3">{w.summary}</div>}
             </Link>
@@ -45,7 +45,7 @@ export default async function DiscoverPage({ searchParams }: { searchParams: Pro
         </aside>
 
         <div className="min-w-0">
-          <div className="mb-4 grid gap-4 rounded-lg border border-line bg-surface p-4 md:grid-cols-2">
+          <div className="mb-4 grid gap-4 rounded-none border border-line bg-surface p-4 md:grid-cols-2">
             <div>
               <div className="mb-2 text-[10.5px] uppercase tracking-[0.08em] text-ink-3">Hard requirements</div>
               <div className="flex flex-wrap gap-1.5">
@@ -57,7 +57,7 @@ export default async function DiscoverPage({ searchParams }: { searchParams: Pro
             </div>
             <div>
               <div className="mb-2 text-[10.5px] uppercase tracking-[0.08em] text-ink-3">Ranking weights</div>
-              <div className="flex h-2.5 overflow-hidden rounded-[2px]">
+              <div className="flex h-2.5 overflow-hidden rounded-none">
                 {weights.map(([k, v], i) => (
                   <span key={k} title={`${DIMENSION_LABELS[k]} ${Math.round(v * 100)}%`} style={{ width: `${v * 100}%`, background: i % 2 ? "var(--copper)" : "var(--accent)", opacity: 1 - i * 0.12 }} />
                 ))}
@@ -81,14 +81,14 @@ export default async function DiscoverPage({ searchParams }: { searchParams: Pro
           </div>
 
           {!r || r.results.length === 0 ? (
-            <div className="rounded-lg border border-line bg-surface">
+            <div className="rounded-none border border-line bg-surface">
               <EmptyState title="No model meets every constraint" body="Relax the price ceiling or context minimum." action={{ href: `/discover?workload=${workload.slug}`, label: "Clear constraints" }} />
             </div>
           ) : (
             <Stagger className="flex flex-col gap-2">
               {r.results.map((rec, i) => (
                 <StaggerItem key={rec.slug}>
-                  <div className="grid gap-3 rounded-lg border border-line bg-surface p-4 md:grid-cols-[40px_minmax(0,1fr)_200px]" data-testid="recommendation">
+                  <div className="grid gap-3 rounded-none border border-line bg-surface p-4 md:grid-cols-[40px_minmax(0,1fr)_200px]" data-testid="recommendation">
                     <div className={cn("num text-[20px]", i < 3 ? "text-copper" : "text-ink-3")}>{String(i + 1).padStart(2, "0")}</div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2.5">

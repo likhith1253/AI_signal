@@ -13,13 +13,13 @@ export default async function ProvidersPage() {
   const max = Math.max(...providers.map((p) => p.offeringCount));
   return (
     <>
-      <PageHeader
+      <PageHeader sheet="09"
         eyebrow="Directory"
         title="Providers"
         description={`${providers.length} inference providers currently serving at least one model. A provider hosts models — often from many labs — at its own price, quantization and limits.`}
       />
       <Container className="py-6">
-        <div className="overflow-x-auto rounded-lg border border-line bg-surface">
+        <div className="overflow-x-auto rounded-none border border-line bg-surface">
           <table className="w-full min-w-[760px] text-left text-[12.5px]" data-testid="providers-table">
             <thead>
               <tr className="border-b border-line bg-surface-2 text-[10.5px] uppercase tracking-[0.08em] text-ink-3">
@@ -45,8 +45,8 @@ export default async function ProvidersPage() {
                   </td>
                   <td className="px-3 py-2.5">
                     <div className="flex items-center gap-2">
-                      <span className="h-[6px] flex-1 overflow-hidden rounded-[2px] bg-surface-3">
-                        <span className="block h-full rounded-[2px] bg-accent" style={{ width: `${(p.offeringCount / max) * 100}%` }} />
+                      <span className="h-[6px] flex-1 overflow-hidden rounded-none bg-surface-3">
+                        <span className="block h-full rounded-none bg-accent" style={{ width: `${(p.offeringCount / max) * 100}%` }} />
                       </span>
                       <span className="num w-8 text-right text-ink">{p.offeringCount}</span>
                     </div>

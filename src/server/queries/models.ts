@@ -4,6 +4,7 @@ import type { ModelListQuery } from "@/lib/validation";
 import { loadPopulation } from "../ingest/derive";
 import { composite, DEFAULT_WEIGHTS, scoreModel } from "../scoring/engine";
 import { num } from "./util";
+import { gridRef } from "@/lib/gridref";
 
 // ─────────────────────────── list ───────────────────────────
 
@@ -81,6 +82,7 @@ export const modelCardSelect = {
   modalities: { select: { direction: true, modality: { select: { slug: true } } } },
   capabilities: { select: { capability: { select: { slug: true } } } },
   score: { select: { overall: true, confidence: true, capability: true, value: true, coding: true } },
+  results: { where: { benchmark: { slug: "aa-intelligence-index" } }, select: { score: true }, take: 1 },
 } satisfies Prisma.ModelSelect;
 
 type CardRow = Prisma.ModelGetPayload<{ select: typeof modelCardSelect }>;
@@ -104,6 +106,8 @@ export function toCard(m: CardRow) {
     outputModalities: m.modalities.filter((x) => x.direction === "OUTPUT").map((x) => x.modality.slug),
     capabilities: m.capabilities.map((x) => x.capability.slug),
     score: m.score ? { overall: m.score.overall, confidence: m.score.confidence, capability: m.score.capability, value: m.score.value, coding: m.score.coding } : null,
+    intelligenceIndex: m.results[0]?.score ?? null,
+    gridRef: gridRef(num(m.blendedPrice), m.results[0]?.score ?? null),
   };
 }
 export type ModelCard = ReturnType<typeof toCard>;

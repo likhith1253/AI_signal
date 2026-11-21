@@ -33,7 +33,7 @@ export default async function BenchmarksPage({ searchParams }: { searchParams: P
 
   return (
     <>
-      <PageHeader
+      <PageHeader sheet="06"
         eyebrow="Benchmark intelligence"
         title="Benchmarks"
         description={`${all.length} benchmarks from ${new Set(all.map((b) => b.source.name)).size} independent sources. Each result keeps its own scale; cross-benchmark views use percentiles so an Elo rating is never compared with a 0–100 index.`}
@@ -47,13 +47,13 @@ export default async function BenchmarksPage({ searchParams }: { searchParams: P
             </div>
             <div className="flex gap-1">
               {Object.entries(sets).map(([k, s]) => (
-                <Link key={k} href={`/benchmarks?set=${k}`} className={cn("h-7 rounded-[4px] border px-2.5 text-[12px] leading-[26px]", active === s ? "border-ink bg-ink text-bg" : "border-line bg-surface text-ink-2")}>
+                <Link key={k} href={`/benchmarks?set=${k}`} className={cn("h-7 rounded-none border px-2.5 text-[12px] leading-[26px]", active === s ? "border-ink bg-ink text-bg" : "border-line bg-surface text-ink-2")}>
                   {s.label}
                 </Link>
               ))}
             </div>
           </div>
-          <div className="overflow-x-auto rounded-lg border border-line bg-surface">
+          <div className="overflow-x-auto rounded-none border border-line bg-surface">
             <table className="w-full min-w-[720px] text-[12.5px]" data-testid="benchmark-matrix">
               <thead>
                 <tr className="border-b border-line text-left">
@@ -79,7 +79,7 @@ export default async function BenchmarksPage({ searchParams }: { searchParams: P
                     </td>
                     {r.cells.map((c, i) => (
                       <td key={i} className="px-1 py-1">
-                        <div className="num rounded-[3px] px-2 py-1 text-center text-[12px]" style={heat(c?.percentile ?? null)} title={c ? `percentile ${Math.round((c.percentile ?? 0) * 100)}` : "not published"}>
+                        <div className="num rounded-none px-2 py-1 text-center text-[12px]" style={heat(c?.percentile ?? null)} title={c ? `percentile ${Math.round((c.percentile ?? 0) * 100)}` : "not published"}>
                           {c ? (matrix.benchmarks[i].scaleLabel === "Elo rating" ? Math.round(c.score) : c.score.toFixed(1)) : <span className="text-ink-3">·</span>}
                         </div>
                       </td>

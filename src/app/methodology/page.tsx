@@ -10,7 +10,7 @@ export default function MethodologyPage() {
   const dims = Object.keys(DEFAULT_WEIGHTS) as DimensionKey[];
   return (
     <>
-      <PageHeader eyebrow={`Methodology · ${METHODOLOGY}`} title="How OneAtlas scores and normalizes" description="Every number OneAtlas computes can be traced back to published inputs. This page is generated from the same constants the scoring code uses, so it cannot drift from the implementation." />
+      <PageHeader sheet="11" eyebrow={`Methodology · ${METHODOLOGY}`} title="How OneAtlas scores and normalizes" description="Every number OneAtlas computes can be traced back to published inputs. This page is generated from the same constants the scoring code uses, so it cannot drift from the implementation." />
       <Container className="grid gap-6 py-7 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="flex flex-col gap-6">
           <Panel title="Atlas Intelligence Score — dimensions and default weights">
@@ -67,7 +67,7 @@ export default function MethodologyPage() {
             <p className="mb-3 text-[13.5px] text-ink-2">Each workload is a declarative profile: hard requirements filter the candidates, then a workload-specific weight vector ranks them. The final fit is confidence-adjusted: <code className="num rounded bg-surface-2 px-1">fit = score × (0.75 + 0.25 × coverage)</code>, so a model with complete data beats an equal score with gaps. No LLM is involved; results are reproducible.</p>
             <div className="grid gap-2 sm:grid-cols-2">
               {WORKLOADS.map((w) => (
-                <div key={w.slug} className="rounded-md border border-line p-3">
+                <div key={w.slug} className="rounded-none border border-line p-3">
                   <Link href={`/discover?workload=${w.slug}`} className="text-[13px] font-medium text-ink hover:underline">
                     {w.name}
                   </Link>

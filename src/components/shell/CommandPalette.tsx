@@ -123,7 +123,7 @@ function Palette({ onClose }: { onClose: () => void }) {
       <motion.div
         role="dialog"
         aria-label="Search OneAtlas"
-        className="relative w-full max-w-[640px] overflow-hidden rounded-lg border border-line-strong bg-surface shadow-[var(--shadow)]"
+        className="relative w-full max-w-[640px] overflow-hidden rounded-none border border-line-strong bg-surface shadow-[var(--shadow)]"
         initial={{ y: -12, scale: 0.98, opacity: 0 }}
         animate={{ y: 0, scale: 1, opacity: 1 }}
         exit={{ y: -8, scale: 0.98, opacity: 0 }}
@@ -222,7 +222,7 @@ function Item({ value, onSelect, icon, label, sub, meta }: { value: string; onSe
     <Command.Item
       value={value}
       onSelect={onSelect}
-      className="group flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 text-sm text-ink-2 data-[selected=true]:bg-surface-2 data-[selected=true]:text-ink"
+      className="group flex cursor-pointer items-center gap-3 rounded-none px-2 py-2 text-sm text-ink-2 data-[selected=true]:bg-surface-2 data-[selected=true]:text-ink"
     >
       <span className="flex w-[22px] justify-center text-ink-3">{icon}</span>
       <span className="min-w-0 flex-1">
@@ -236,5 +236,5 @@ function Item({ value, onSelect, icon, label, sub, meta }: { value: string; onSe
 }
 
 export function Kbd({ children }: { children: React.ReactNode }) {
-  return <kbd className="num inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-[3px] border border-line-strong bg-surface px-1 text-[10px] text-ink-2">{children}</kbd>;
+  return <kbd className="num inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-none border border-line-strong bg-surface px-1 text-[10px] text-ink-2">{children}</kbd>;
 }

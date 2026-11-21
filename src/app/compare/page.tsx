@@ -134,7 +134,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <PageHeader
+      <PageHeader sheet="04"
         eyebrow="Comparison"
         title="Compare models"
         description="Add up to four models. The selection is saved as you browse and the URL is shareable."
@@ -145,12 +145,12 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
       </Suspense>
       <Container className="py-6">
         {data?.missing.length ? (
-          <div className="mb-4 rounded-md border border-line bg-copper-soft px-3 py-2 text-[12.5px] text-copper">Not found and skipped: {data.missing.join(", ")}</div>
+          <div className="mb-4 rounded-none border border-line bg-copper-soft px-3 py-2 text-[12.5px] text-copper">Not found and skipped: {data.missing.join(", ")}</div>
         ) : null}
 
         {models.length === 0 ? (
           <div className="grid gap-6 md:grid-cols-[1fr_280px]">
-            <div className="rounded-lg border border-line bg-surface">
+            <div className="rounded-none border border-line bg-surface">
               <EmptyState title="Nothing to compare yet" body="Add models with the + button on any model row, or search below. Your selection persists across pages." action={{ href: "/models", label: "Browse models" }} />
             </div>
             <Suspense>
@@ -161,10 +161,10 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
           <div className="overflow-x-auto pb-2">
             <div className="min-w-[680px]">
               {/* column headers */}
-              <div className="sticky top-14 z-20 grid gap-3 bg-bg py-3" style={{ gridTemplateColumns: `180px repeat(${cols}, minmax(0, 1fr))` }}>
+              <div className="sticky top-14 md:top-[74px] z-20 grid gap-3 bg-bg py-3" style={{ gridTemplateColumns: `180px repeat(${cols}, minmax(0, 1fr))` }}>
                 <div />
                 {models.map((m) => (
-                  <div key={m.slug} className="rounded-lg border border-line bg-surface p-3" data-testid="compare-column">
+                  <div key={m.slug} className="rounded-none border border-line bg-surface p-3" data-testid="compare-column">
                     <div className="flex items-start justify-between gap-2">
                       <LabMark slug={m.lab.slug} size={26} />
                       <Suspense>
@@ -197,7 +197,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
                       <h2 className="font-display text-[18px] text-ink">{s.title}</h2>
                       {s.note && <span className="text-[11.5px] text-ink-3">{s.note}</span>}
                     </div>
-                    <div className="overflow-hidden rounded-lg border border-line bg-surface">
+                    <div className="overflow-hidden rounded-none border border-line bg-surface">
                       {rows.map((r) => {
                         const best = bestIndex(r);
                         return (

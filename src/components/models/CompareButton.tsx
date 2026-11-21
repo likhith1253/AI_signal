@@ -19,7 +19,7 @@ export function CompareButton({ slug, name, lab, variant = "icon" }: { slug: str
         onClick={onClick}
         disabled={full}
         className={cn(
-          "inline-flex h-8 items-center gap-1.5 rounded-md border px-3 text-[13px] transition-colors disabled:opacity-50",
+          "inline-flex h-8 items-center gap-1.5 rounded-none border px-3 text-[13px] transition-colors disabled:opacity-50",
           selected ? "border-accent bg-accent-soft text-accent" : "border-line-strong bg-surface text-ink hover:bg-surface-2",
         )}
         data-testid="compare-toggle"
@@ -39,7 +39,7 @@ export function CompareButton({ slug, name, lab, variant = "icon" }: { slug: str
       aria-pressed={selected}
       data-testid="compare-toggle"
       className={cn(
-        "flex h-7 w-7 items-center justify-center rounded-md border transition-colors disabled:opacity-40",
+        "flex h-7 w-7 items-center justify-center rounded-none border transition-colors disabled:opacity-40",
         selected ? "border-accent bg-accent text-accent-ink" : "border-line bg-surface text-ink-3 hover:border-line-strong hover:text-ink",
       )}
     >

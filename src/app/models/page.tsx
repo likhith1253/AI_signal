@@ -26,7 +26,7 @@ export default async function ModelsPage({ searchParams }: { searchParams: Promi
 
   return (
     <>
-      <PageHeader
+      <PageHeader sheet="02"
         eyebrow="Model registry"
         title="Discover models"
         description="One identity per model, regardless of how many providers serve it. Prices shown are the cheapest active offering; blended price uses a 3:1 input:output mix."
@@ -34,7 +34,7 @@ export default async function ModelsPage({ searchParams }: { searchParams: Promi
       <Container className="py-6">
         <div className="grid gap-6 lg:grid-cols-[248px_minmax(0,1fr)]">
           <aside className="hidden lg:block">
-            <div className="sticky top-[72px] max-h-[calc(100dvh-88px)] overflow-y-auto pr-1 scrollbar-thin" data-testid="filter-panel">
+            <div className="sticky top-[90px] max-h-[calc(100dvh-104px)] overflow-y-auto pr-1 scrollbar-thin" data-testid="filter-panel">
               <Suspense>
                 <FilterControls facets={facets} />
               </Suspense>

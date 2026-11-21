@@ -42,12 +42,12 @@ export default async function LabPage({ params }: { params: Promise<{ slug: stri
               </div>
             </div>
             {lab.website && (
-              <a href={lab.website} target="_blank" rel="noreferrer" className="inline-flex h-8 shrink-0 items-center gap-1 rounded-md border border-line bg-surface px-3 text-[13px] text-ink-2 hover:text-ink">
+              <a href={lab.website} target="_blank" rel="noreferrer" className="inline-flex h-8 shrink-0 items-center gap-1 rounded-none border border-line bg-surface px-3 text-[13px] text-ink-2 hover:text-ink">
                 Website <ArrowUpRight size={13} />
               </a>
             )}
           </div>
-          <div className="mt-6 grid grid-cols-2 gap-5 rounded-lg border border-line bg-surface p-5 sm:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-5 rounded-none border border-line bg-surface p-5 sm:grid-cols-4">
             <Stat label="Models" value={lab.models.length} />
             <Stat label="Families" value={families.length} />
             <Stat label="Served by" value={lab.servedBy.length} sub="providers" />

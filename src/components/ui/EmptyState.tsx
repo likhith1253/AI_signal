@@ -21,7 +21,7 @@ export function EmptyState({ title, body, action }: { title: string; body?: Reac
       <div className="font-display text-[19px] text-ink">{title}</div>
       {body && <div className="mt-1 max-w-[420px] text-[13.5px] text-ink-2">{body}</div>}
       {action && typeof action === "object" && "href" in (action as object) ? (
-        <Link href={(action as { href: string }).href} className="mt-4 rounded-md border border-line-strong px-3 py-1.5 text-[13px] text-ink hover:bg-surface-2">
+        <Link href={(action as { href: string }).href} className="mt-4 rounded-none border border-line-strong px-3 py-1.5 text-[13px] text-ink hover:bg-surface-2">
           {(action as { label: string }).label}
         </Link>
       ) : (

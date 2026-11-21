@@ -41,7 +41,7 @@ export function ProviderPrices({ offerings }: { offerings: Offering[] }) {
   return (
     <div>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <div className="flex rounded-md border border-line bg-surface-2 p-0.5 text-[12px]">
+        <div className="flex rounded-none border border-line bg-surface-2 p-0.5 text-[12px]">
           {(
             [
               ["blended", "Blended 3:1"],
@@ -49,8 +49,8 @@ export function ProviderPrices({ offerings }: { offerings: Offering[] }) {
               ["OUTPUT", "Output"],
             ] as const
           ).map(([k, l]) => (
-            <button key={k} onClick={() => setMetric(k)} className={cn("relative rounded-[4px] px-2.5 py-1", metric === k ? "text-ink" : "text-ink-3")}>
-              {metric === k && <motion.span layoutId="pp-metric" className="absolute inset-0 rounded-[4px] bg-surface shadow-[0_0_0_1px_var(--line)]" />}
+            <button key={k} onClick={() => setMetric(k)} className={cn("relative rounded-none px-2.5 py-1", metric === k ? "text-ink" : "text-ink-3")}>
+              {metric === k && <motion.span layoutId="pp-metric" className="absolute inset-0 rounded-none bg-surface shadow-[0_0_0_1px_var(--line)]" />}
               <span className="relative">{l}</span>
             </button>
           ))}
@@ -93,8 +93,8 @@ export function ProviderPrices({ offerings }: { offerings: Offering[] }) {
                     <span className="text-ink-3">{o.prices.some((p) => p.isVariable) ? "Variable" : "Not published"}</span>
                   ) : (
                     <span className="flex items-center gap-2">
-                      <span className="h-[7px] flex-1 overflow-hidden rounded-[2px] bg-surface-3">
-                        <motion.span className={cn("block h-full rounded-[2px]", v === best ? "bg-accent" : "bg-ink-3")} initial={{ width: 0 }} animate={{ width: `${Math.max(2, (v / max) * 100)}%` }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }} />
+                      <span className="h-[7px] flex-1 overflow-hidden rounded-none bg-surface-3">
+                        <motion.span className={cn("block h-full rounded-none", v === best ? "bg-accent" : "bg-ink-3")} initial={{ width: 0 }} animate={{ width: `${Math.max(2, (v / max) * 100)}%` }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }} />
                       </span>
                       <span className={cn("num w-[64px] text-right", v === best ? "text-accent" : "text-ink")}>{fmtPrice(v)}</span>
                     </span>

@@ -6,10 +6,10 @@ import { WORKLOADS } from "@/server/recommend/workloads";
 import { Container, LinkArrow, Panel, SectionTitle } from "@/components/ui/primitives";
 import { CountUp, Reveal, Stagger, StaggerItem } from "@/components/ui/motion";
 import { HeroSearch } from "@/components/shell/HeroSearch";
-import { FrontierChart } from "@/components/charts/FrontierChart";
+import { TopoMap } from "@/components/charts/TopoMap";
 import { ChangeFeed } from "@/components/ledger/ChangeFeed";
 import { LabMark } from "@/components/identity/LabMark";
-import { CapabilityIcons, ScoreDial, TypeTag } from "@/components/models/bits";
+import { ScoreDial, TypeTag } from "@/components/models/bits";
 import { MiniModelList } from "@/components/models/MiniModelList";
 import { fmtDate, fmtPrice, fmtRelative, fmtTokens, TYPE_LABELS } from "@/lib/format";
 import { paretoFrontier } from "@/lib/frontier";
@@ -26,6 +26,15 @@ const WORKLOAD_ICONS: Record<string, typeof Brain> = {
   "cost-sensitive": PiggyBank,
 };
 
+function LegendRow({ symbol, children }: { symbol: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <li className="flex items-center gap-3 text-[12.5px] text-ink-2">
+      <span className="flex w-8 shrink-0 justify-center">{symbol}</span>
+      {children}
+    </li>
+  );
+}
+
 export default async function Home() {
   const [o, providers] = await Promise.all([getOverview(), listProviders()]);
   const frontier = paretoFrontier(o.landscape);
@@ -38,115 +47,133 @@ export default async function Home() {
 
   return (
     <div>
-      {/* ── hero ── */}
-      <section className="paper-grid relative border-b border-line">
-        <Container className="grid gap-8 py-10 md:py-14 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
-          <div>
-            <div className="mb-4 inline-flex items-center gap-2 rounded-[4px] border border-line bg-surface px-2 py-1 text-[11.5px] text-ink-2">
+      {/* ── title block ── */}
+      <section className="px-4 pt-6 md:px-8">
+        <div className="mx-auto max-w-[1320px]">
+          <div className="flex items-center gap-3 text-[10.5px] text-ink-3">
+            <span className="letter border border-ink px-1.5 py-[1px] text-[11px] font-semibold text-ink">Sheet 01</span>
+            <span className="letter">General survey</span>
+            <span className="h-px flex-1 bg-line-strong" />
+            <span className="num flex items-center gap-1.5">
               <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-positive opacity-60" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-positive" />
+                <span className="absolute inline-flex h-full w-full animate-ping bg-copper opacity-60" />
+                <span className="relative inline-flex h-1.5 w-1.5 bg-copper" />
               </span>
-              Catalogue synced {fmtRelative(o.lastSync)} from live sources
-            </div>
-            <h1 className="max-w-[640px] font-display text-[38px] leading-[1.04] tracking-[-0.015em] text-ink md:text-[54px]">
-              The intelligence layer for the <em className="text-accent">AI model</em> ecosystem.
-            </h1>
-            <p className="mt-4 max-w-[560px] text-[15.5px] leading-relaxed text-ink-2">
-              One normalized registry of models, the providers that serve them and what they really cost — scored with a transparent, traceable method and diffed every sync so you can see the market move.
-            </p>
-            <div className="mt-6">
-              <HeroSearch />
-            </div>
-            <dl className="mt-8 grid max-w-[640px] grid-cols-3 gap-x-2 gap-y-5 sm:grid-cols-5">
-              {[
-                ["Models", o.counts.models],
-                ["Labs", o.counts.labs],
-                ["Providers", o.counts.providers],
-                ["Offerings", o.counts.offerings],
-                ["Benchmarks", o.counts.results],
-              ].map(([k, v]) => (
-                <div key={k as string} className="border-l border-line pl-3">
-                  <dt className="text-[10.5px] uppercase tracking-[0.09em] text-ink-3">{k}</dt>
-                  <dd className="num mt-1 text-[21px] leading-none text-ink">
-                    <CountUp value={v as number} />
-                  </dd>
-                </div>
-              ))}
-            </dl>
+              resurveyed {fmtRelative(o.lastSync)}
+            </span>
           </div>
-          <Panel
-            className="self-start shadow-[var(--shadow)]"
-            title={
-              <span className="flex items-center gap-2">
-                Change ledger <span className="hidden text-[11px] font-normal text-ink-3 xl:inline">what moved, as observed</span>
-              </span>
-            }
-            action={<LinkArrow href="/engine#ledger">All changes</LinkArrow>}
-            flush
-          >
-            <ChangeFeed items={o.changes.slice(0, 7)} />
-          </Panel>
-        </Container>
+          <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] lg:items-end">
+            <h1 className="font-display text-[44px] font-bold leading-[0.88] text-ink sm:text-[64px] xl:text-[80px]">
+              The terrain of
+              <br />
+              machine <span className="water font-normal normal-case tracking-normal text-copper">intelligence</span>
+            </h1>
+            <div>
+              <p className="text-[15.5px] leading-relaxed text-ink-2">
+                Every model is a station on one sheet, plotted by what it costs and how capable it is. The contours show where the market crowds together, and the red ridge marks the models nothing else beats. Each sync redraws the map and logs what moved.
+              </p>
+              <div className="mt-4">
+                <HeroSearch />
+              </div>
+            </div>
+          </div>
+          <div className="mt-5 border-t-[3px] border-double border-ink" />
+        </div>
+      </section>
+
+      {/* ── the map ── */}
+      <section className="px-4 pt-5 md:px-8">
+        <div className="mx-auto grid max-w-[1320px] gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
+          <div className="ticked min-w-0 border border-ink bg-surface-2/40 p-2 md:p-3">
+            {/* on phones the sheet keeps its scale and pans sideways, like unfolding a map */}
+            <div className="scrollbar-thin overflow-x-auto">
+              <div className="min-w-[680px]">
+                <TopoMap points={o.landscape} />
+              </div>
+            </div>
+            <p className="water mt-1 text-center text-[11.5px] text-ink-3 md:hidden">Drag sideways to pan the sheet</p>
+          </div>
+          <aside className="flex flex-col gap-4 text-[12.5px]">
+            <Panel title="Legend">
+              <ul className="flex flex-col gap-2.5">
+                <LegendRow symbol={<svg width="14" height="12"><path d="M7 1 L13 11 H1Z" fill="var(--ink-3)" /></svg>}>Surveyed model (colour = lab)</LegendRow>
+                <LegendRow symbol={<svg width="14" height="12"><path d="M7 1 L13 11 H1Z" fill="var(--copper)" /></svg>}>Frontier station</LegendRow>
+                <LegendRow symbol={<svg width="30" height="8"><path d="M0 4 H30" stroke="var(--copper)" strokeWidth="2" strokeDasharray="7 4" /></svg>}>Frontier ridge (Pareto)</LegendRow>
+                <LegendRow symbol={<svg width="30" height="10"><path d="M0 7 Q8 1 15 5 T30 3" stroke="var(--contour)" fill="none" strokeWidth="1.3" /></svg>}>Contour: density of models</LegendRow>
+                <LegendRow symbol={<svg width="26" height="10"><path d="M2 7 h5 M12 3 h5 M19 8 h5" stroke="var(--line-strong)" strokeWidth="1" /></svg>}>Costly shallows</LegendRow>
+              </ul>
+            </Panel>
+            <Panel title="Survey notes">
+              <dl className="grid grid-cols-2 gap-x-3 gap-y-3">
+                {[
+                  ["Stations charted", o.counts.models],
+                  ["Benchmarked", o.landscape.length],
+                  ["On the ridge", frontier.length],
+                  ["Labs", o.counts.labs],
+                  ["Providers", o.counts.providers],
+                  ["Offerings", o.counts.offerings],
+                ].map(([k, v]) => (
+                  <div key={k as string}>
+                    <dt className="letter text-[9.5px] text-ink-3">{k}</dt>
+                    <dd className="num mt-1 text-[19px] leading-none text-ink">
+                      <CountUp value={v as number} />
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="water mt-3 border-t border-line pt-2 text-[12px] text-ink-3">
+                Datum: AA Intelligence Index × log₁₀ blended price. Fixed, so grid references keep their meaning between editions.
+              </p>
+            </Panel>
+          </aside>
+        </div>
       </section>
 
       <Container className="flex flex-col gap-12 py-10">
-        {/* ── frontier ── */}
-        <Reveal>
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
-            <div>
-              <SectionTitle kicker="Cost-to-capability" action={<LinkArrow href="/rankings?category=value">Value ranking</LinkArrow>}>
-                Who you can afford at each level of intelligence
-              </SectionTitle>
-              <div className="rounded-lg border border-line bg-surface p-4">
-                <FrontierChart points={o.landscape} />
-              </div>
-            </div>
-            <div className="flex flex-col gap-3 lg:pt-[52px]">
-              <p className="text-[13.5px] leading-relaxed text-ink-2">
-                {o.landscape.length} models have both a published Artificial Analysis Intelligence Index and a known price. Only <span className="text-ink">{frontier.length}</span> sit on the frontier: for every other model, something on this line is cheaper and at least as capable.
-              </p>
-              <div className="rounded-lg border border-line bg-surface">
-                <div className="border-b border-line px-4 py-2 text-[10.5px] uppercase tracking-[0.08em] text-ink-3">Frontier, cheapest first</div>
-                <ul>
-                  {frontier.slice(0, 7).map((f) => (
-                    <li key={f.slug} className="border-b border-line last:border-0">
-                      <Link href={`/models/${f.slug}`} className="flex items-center justify-between gap-2 px-4 py-2 text-[12.5px] hover:bg-surface-2">
-                        <span className="truncate text-ink">{f.name}</span>
-                        <span className="num shrink-0 text-ink-3">
-                          {f.intelligence} · {fmtPrice(f.price)}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-        </Reveal>
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+          <Panel title="Field dispatches: observed changes" action={<LinkArrow href="/engine#ledger">Full log</LinkArrow>} flush>
+            <ChangeFeed items={o.changes.slice(0, 8)} />
+          </Panel>
+          <Panel title="Along the ridge, cheapest first" action={<LinkArrow href="/rankings?category=value">Value ranking</LinkArrow>} flush>
+            <p className="water border-b border-line px-4 py-2.5 text-[13px] text-ink-2">For every model off this line, one on it is cheaper and at least as capable.</p>
+            <ol>
+              {frontier.slice(0, 8).map((f, i) => (
+                <li key={f.slug} className="border-b border-line last:border-0">
+                  <Link href={`/models/${f.slug}`} className="grid grid-cols-[22px_minmax(0,1fr)_auto] items-center gap-2 px-4 py-2 text-[13px] hover:bg-surface-2">
+                    <span className="num text-[10px] text-copper">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="truncate text-ink">{f.name}</span>
+                    <span className="num text-[11px] text-ink-3">
+                      idx {f.intelligence} · {fmtPrice(f.price)}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          </Panel>
+        </div>
 
-        {/* ── featured ── */}
         <section>
-          <SectionTitle kicker="Highest Atlas score" action={<LinkArrow href="/rankings">Full rankings</LinkArrow>}>
-            Leading models right now
+          <SectionTitle kicker="Highest stations" action={<LinkArrow href="/rankings">All rankings</LinkArrow>}>
+            Leading Atlas scores
           </SectionTitle>
-          <Stagger className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <Stagger className="grid gap-px border border-ink bg-ink sm:grid-cols-2 lg:grid-cols-3">
             {o.featured.map((m, i) => (
-              <StaggerItem key={m.slug}>
-                <Link href={`/models/${m.slug}`} className="group relative flex h-full gap-4 rounded-lg border border-line bg-surface p-4 transition-all hover:-translate-y-0.5 hover:border-line-strong hover:shadow-[var(--shadow)]">
-                  <span className="num absolute right-4 top-3 text-[11px] text-ink-3">#{i + 1}</span>
-                  <ScoreDial score={m.score?.overall} confidence={m.score?.confidence} size={50} />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5 text-[12px] text-ink-3">
-                      <LabMark slug={m.lab.slug} size={16} /> {m.lab.name}
-                    </div>
-                    <div className="mt-1 truncate text-[15px] font-medium text-ink">{m.name}</div>
-                    <div className="num mt-2 flex gap-3 text-[11.5px] text-ink-2">
-                      <span>{fmtPrice(m.pricing.blended)}/M</span>
-                      <span>{fmtTokens(m.contextLength)} ctx</span>
-                      <span>{m.providerCount} prov.</span>
-                    </div>
-                    <CapabilityIcons caps={m.capabilities} max={5} className="mt-2.5" />
+              <StaggerItem key={m.slug} className="bg-surface">
+                <Link href={`/models/${m.slug}`} className="group flex h-full flex-col p-4 transition-colors hover:bg-surface-2">
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="num text-[11px] text-ink-3">
+                      No.{String(i + 1).padStart(2, "0")} {m.gridRef && <span className="text-copper">· {m.gridRef}</span>}
+                    </span>
+                    <ScoreDial score={m.score?.overall} confidence={m.score?.confidence} size={52} />
+                  </div>
+                  <div className="mt-2 text-[17px] font-semibold leading-tight text-ink group-hover:underline group-hover:decoration-copper group-hover:underline-offset-4">{m.name}</div>
+                  <div className="mt-1 flex items-center gap-2 text-[12.5px] text-ink-3">
+                    <LabMark slug={m.lab.slug} size={18} /> <span className="water">{m.lab.name}</span>
+                  </div>
+                  <div className="num mt-4 flex gap-4 border-t border-dashed border-line-strong pt-2.5 text-[11px] text-ink-2">
+                    <span>{fmtPrice(m.pricing.blended)}/M</span>
+                    <span>{fmtTokens(m.contextLength)} ctx</span>
+                    <span>{m.providerCount} prov.</span>
                   </div>
                 </Link>
               </StaggerItem>
@@ -154,47 +181,48 @@ export default async function Home() {
           </Stagger>
         </section>
 
-        {/* ── workloads ── */}
         <Reveal>
-          <SectionTitle kicker="Workload finder" action={<LinkArrow href="/discover">Open finder</LinkArrow>}>
+          <SectionTitle kicker="Plan a route" action={<LinkArrow href="/discover">Workload finder</LinkArrow>}>
             Start from the job, not the model name
           </SectionTitle>
-          <div className="grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
-            {WORKLOADS.map((w) => {
+          <div className="grid border-l border-t border-line-strong sm:grid-cols-2 lg:grid-cols-4">
+            {WORKLOADS.map((w, i) => {
               const I = WORKLOAD_ICONS[w.slug] ?? Brain;
               return (
-                <Link key={w.slug} href={`/discover?workload=${w.slug}`} className="group flex flex-col gap-2 bg-surface p-4 transition-colors hover:bg-surface-2">
-                  <I size={17} strokeWidth={1.6} className="text-copper" />
-                  <span className="text-[14px] font-medium text-ink">{w.name}</span>
+                <Link key={w.slug} href={`/discover?workload=${w.slug}`} className="group relative flex flex-col gap-2 border-b border-r border-line-strong bg-surface p-4 transition-colors hover:bg-surface-2">
+                  <span className="flex items-center justify-between">
+                    <I size={18} strokeWidth={1.5} className="text-copper" />
+                    <span className="num text-[10px] text-ink-3">R{String(i + 1).padStart(2, "0")}</span>
+                  </span>
+                  <span className="letter text-[14px] font-semibold text-ink">{w.name}</span>
                   <span className="text-[12.5px] leading-snug text-ink-3">{w.summary}</span>
-                  <span className="mt-auto pt-1 text-[12px] text-accent opacity-0 transition-opacity group-hover:opacity-100">See picks →</span>
+                  <span className="letter mt-auto pt-1 text-[11px] font-semibold text-copper opacity-0 transition-opacity group-hover:opacity-100">Plot route →</span>
                 </Link>
               );
             })}
-            <Link href="/compare" className="flex flex-col justify-center gap-1 bg-surface-2 p-4 hover:bg-surface-3">
-              <span className="font-display text-[18px] text-ink">Already have a shortlist?</span>
-              <span className="flex items-center gap-1 text-[12.5px] text-ink-2">
-                Compare up to four models <ArrowRight size={13} />
+            <Link href="/compare" className="flex flex-col justify-center gap-1 border-b border-r border-line-strong bg-ink p-4 text-bg hover:opacity-90">
+              <span className="font-display text-[20px]">Have a shortlist?</span>
+              <span className="flex items-center gap-1 text-[12.5px] opacity-80">
+                Compare up to four side by side <ArrowRight size={13} />
               </span>
             </Link>
           </div>
         </Reveal>
 
-        {/* ── three columns ── */}
         <div className="grid gap-6 lg:grid-cols-3">
           <Panel title="Best value" action={<LinkArrow href="/rankings?category=value">More</LinkArrow>} flush>
             <MiniModelList models={o.bestValue} />
-            <p className="border-t border-line px-4 py-2 text-[11px] text-ink-3">Geometric mean of capability percentile and cost efficiency.</p>
+            <p className="water border-t border-line px-4 py-2 text-[12px] text-ink-3">Geometric mean of capability percentile and cost efficiency.</p>
           </Panel>
-          <Panel title="Recently released" action={<LinkArrow href="/models?sort=newest">More</LinkArrow>} flush>
+          <Panel title="Newly charted" action={<LinkArrow href="/models?sort=newest">More</LinkArrow>} flush>
             <ul>
               {o.recent.slice(0, 6).map((m) => (
                 <li key={m.slug} className="border-b border-line last:border-0">
                   <Link href={`/models/${m.slug}`} className="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-2">
-                    <LabMark slug={m.lab.slug} size={24} />
+                    <LabMark slug={m.lab.slug} size={26} />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[13px] text-ink">{m.name}</span>
-                      <span className="block text-[11px] text-ink-3">
+                      <span className="block truncate text-[13.5px] text-ink">{m.name}</span>
+                      <span className="num block text-[10.5px] text-ink-3">
                         {m.lab.name} · {fmtDate(m.releasedAt)}
                       </span>
                     </span>
@@ -205,37 +233,37 @@ export default async function Home() {
             </ul>
           </Panel>
           <div className="flex flex-col gap-6">
-            <Panel title="Ecosystem by model type">
+            <Panel title="Land use: models by type">
               <ul className="flex flex-col gap-2">
                 {o.byType.map((t) => (
                   <li key={t.type}>
                     <Link href={`/models?type=${t.type}`} className="group grid grid-cols-[88px_1fr_36px] items-center gap-2 text-[12.5px]">
                       <span className="text-ink-2 group-hover:text-ink">{TYPE_LABELS[t.type]}</span>
-                      <span className="h-[7px] overflow-hidden rounded-[2px] bg-surface-3">
-                        <span className="block h-full rounded-[2px] bg-accent transition-all group-hover:bg-copper" style={{ width: `${(t.count / maxType) * 100}%` }} />
+                      <span className="h-[8px] border border-line-strong">
+                        <span className="block h-full bg-accent transition-colors group-hover:bg-copper" style={{ width: `${(t.count / maxType) * 100}%` }} />
                       </span>
                       <span className="num text-right text-ink">{t.count}</span>
                     </Link>
                   </li>
                 ))}
               </ul>
-              <div className="mt-3 flex gap-4 border-t border-line pt-3 text-[12px] text-ink-3">
+              <div className="num mt-3 flex gap-4 border-t border-line pt-3 text-[11px] text-ink-3">
                 <span>
-                  <span className="num text-ink">{o.counts.openWeights}</span> open weights
+                  <span className="text-ink">{o.counts.openWeights}</span> open weights
                 </span>
                 <span>
-                  <span className="num text-ink">{o.counts.free}</span> with free tier
+                  <span className="text-ink">{o.counts.free}</span> free tier
                 </span>
               </div>
             </Panel>
-            <Panel title="Largest providers" action={<LinkArrow href="/providers">All</LinkArrow>} flush>
+            <Panel title="Ports of call: largest providers" action={<LinkArrow href="/providers">All</LinkArrow>} flush>
               <ul>
                 {providers.slice(0, 5).map((p) => (
                   <li key={p.slug} className="border-b border-line last:border-0">
                     <Link href={`/providers/${p.slug}`} className="flex items-center gap-3 px-4 py-2 hover:bg-surface-2">
                       <LabMark slug={p.slug} size={22} />
                       <span className="flex-1 truncate text-[13px] text-ink">{p.name}</span>
-                      <span className="num text-[11.5px] text-ink-3">{p.offeringCount} models</span>
+                      <span className="num text-[11px] text-ink-3">{p.offeringCount}</span>
                     </Link>
                   </li>
                 ))}
@@ -244,19 +272,18 @@ export default async function Home() {
           </div>
         </div>
 
-        {/* ── popular comparisons ── */}
         {pairs.length > 0 && (
           <Reveal>
             <SectionTitle kicker="Head to head">Comparisons worth running</SectionTitle>
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-3">
               {pairs.map(([a, b]) => (
-                <Link key={`${a.slug}-${b.slug}`} href={`/compare?models=${a.slug},${b.slug}`} className="group flex items-center gap-3 rounded-lg border border-line bg-surface p-4 hover:border-line-strong">
-                  <LabMark slug={a.lab.slug} size={28} />
+                <Link key={`${a.slug}-${b.slug}`} href={`/compare?models=${a.slug},${b.slug}`} className="ticked group flex items-center gap-3 border border-line-strong bg-surface p-4 hover:border-ink">
+                  <LabMark slug={a.lab.slug} size={30} />
                   <span className="min-w-0 flex-1 text-[13px]">
-                    <span className="block truncate text-ink">{a.name}</span>
-                    <span className="text-ink-3">vs</span> <span className="text-ink">{b.name}</span>
+                    <span className="block truncate font-medium text-ink">{a.name}</span>
+                    <span className="water text-ink-3">versus</span> <span className="font-medium text-ink">{b.name}</span>
                   </span>
-                  <LabMark slug={b.lab.slug} size={28} />
+                  <LabMark slug={b.lab.slug} size={30} />
                   <ArrowRight size={14} className="text-ink-3 transition-transform group-hover:translate-x-0.5" />
                 </Link>
               ))}

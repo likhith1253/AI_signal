@@ -2,6 +2,8 @@
 import { motion } from "motion/react";
 import { useState } from "react";
 
+const SHORT: Record<string, string> = { capability: "Capab.", coding: "Coding", agentic: "Agentic", costEfficiency: "Cost", value: "Value", context: "Context", availability: "Avail.", versatility: "Versat." };
+
 interface Dim {
   key: string;
   label: string;
@@ -16,14 +18,14 @@ export function ScoreWheel({ dims, overall, size = 260 }: { dims: Dim[]; overall
   const [hover, setHover] = useState<string | null>(null);
   const c = size / 2;
   const inner = size * 0.15;
-  const outer = size * 0.44;
+  const outer = size * 0.36;
   const n = dims.length;
   const gap = 0.05;
   const petal = (i: number, value: number) => {
     const a0 = (i / n) * Math.PI * 2 - Math.PI / 2 + gap;
     const a1 = ((i + 1) / n) * Math.PI * 2 - Math.PI / 2 - gap;
     const r = inner + (outer - inner) * (value / 100);
-    const p = (a: number, rr: number) => `${c + Math.cos(a) * rr} ${c + Math.sin(a) * rr}`;
+    const p = (a: number, rr: number) => `${(c + Math.cos(a) * rr).toFixed(2)} ${(c + Math.sin(a) * rr).toFixed(2)}`;
     return `M${p(a0, inner)} L${p(a0, r)} A${r} ${r} 0 0 1 ${p(a1, r)} L${p(a1, inner)} A${inner} ${inner} 0 0 0 ${p(a0, inner)} Z`;
   };
   const active = dims.find((d) => d.key === hover);
@@ -31,7 +33,7 @@ export function ScoreWheel({ dims, overall, size = 260 }: { dims: Dim[]; overall
     <div className="relative" style={{ width: size, height: size }}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label="Atlas score by dimension">
         {[25, 50, 75, 100].map((g) => (
-          <circle key={g} cx={c} cy={c} r={inner + (outer - inner) * (g / 100)} fill="none" stroke="var(--line)" strokeDasharray={g === 100 ? "0" : "2 4"} />
+          <circle key={g} cx={c} cy={c} r={inner + (outer - inner) * (g / 100)} fill="none" stroke="var(--contour)" strokeOpacity={0.6} strokeWidth={g % 50 === 0 ? 1 : 0.5} strokeDasharray={g === 100 ? "0" : "2 3"} />
         ))}
         {dims.map((d, i) => (
           <g key={d.key} onMouseEnter={() => setHover(d.key)} onMouseLeave={() => setHover(null)} style={{ cursor: "default" }}>
@@ -45,16 +47,18 @@ export function ScoreWheel({ dims, overall, size = 260 }: { dims: Dim[]; overall
                 animate={{ opacity: hover && hover !== d.key ? 0.35 : 1, scale: 1 }}
                 transition={{ delay: i * 0.05, type: "spring", stiffness: 160, damping: 18 }}
                 style={{ transformOrigin: `${c}px ${c}px` }}
-                fill={i % 2 ? "var(--copper)" : "var(--accent)"}
-                fillOpacity={0.85}
+                fill="var(--copper)"
+                fillOpacity={0.35 + (d.score / 100) * 0.55}
+                stroke="var(--ink)"
+                strokeWidth={0.8}
               />
             )}
             {(() => {
               const a = ((i + 0.5) / n) * Math.PI * 2 - Math.PI / 2;
               const r = outer + 12;
               return (
-                <text x={c + Math.cos(a) * r} y={c + Math.sin(a) * r} textAnchor="middle" dominantBaseline="middle" className="fill-ink-3 font-mono text-[9px] uppercase tracking-wider">
-                  {d.label.split(" ")[0].slice(0, 7)}
+                <text x={(c + Math.cos(a) * r).toFixed(2)} y={(c + Math.sin(a) * r).toFixed(2)} textAnchor="middle" dominantBaseline="middle" className="fill-ink-3 font-mono text-[9px] uppercase tracking-wider">
+                  {SHORT[d.key] ?? d.label}
                 </text>
               );
             })()}

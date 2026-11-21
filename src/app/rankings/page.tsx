@@ -46,7 +46,7 @@ export default async function RankingsPage({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <PageHeader eyebrow="Leaderboards" title="Rankings" description="Every leaderboard states where its numbers come from: an independent benchmark, a vendor specification, or a OneAtlas-derived composite. Different scales are never mixed in one ranking.">
+      <PageHeader sheet="05" eyebrow="Leaderboards" title="Rankings" description="Every leaderboard states where its numbers come from: an independent benchmark, a vendor specification, or a OneAtlas-derived composite. Different scales are never mixed in one ranking.">
         <div className="scrollbar-thin -mx-1 flex gap-1 overflow-x-auto px-1 pb-1" role="tablist">
           {CATEGORIES.map((c) => (
             <Link
@@ -55,7 +55,7 @@ export default async function RankingsPage({ searchParams }: { searchParams: Pro
               role="tab"
               aria-selected={q.category === c.key}
               className={cn(
-                "flex shrink-0 flex-col rounded-md border px-3 py-1.5 text-left transition-colors",
+                "flex shrink-0 flex-col rounded-none border px-3 py-1.5 text-left transition-colors",
                 q.category === c.key ? "border-ink bg-ink text-bg" : "border-line bg-surface text-ink hover:border-line-strong",
               )}
             >
@@ -77,7 +77,7 @@ export default async function RankingsPage({ searchParams }: { searchParams: Pro
               {FILTERS.map((f) => {
                 const active = f.key ? q.capability.includes(f.key) : q.capability.length === 0;
                 return (
-                  <Link key={f.key} href={href({ capability: f.key || null })} className={cn("h-7 rounded-[4px] border px-2 text-[12px] leading-[26px]", active ? "border-accent bg-accent-soft text-accent" : "border-line bg-surface text-ink-2 hover:border-line-strong")}>
+                  <Link key={f.key} href={href({ capability: f.key || null })} className={cn("h-7 rounded-none border px-2 text-[12px] leading-[26px]", active ? "border-accent bg-accent-soft text-accent" : "border-line bg-surface text-ink-2 hover:border-line-strong")}>
                     {f.label}
                   </Link>
                 );
@@ -85,7 +85,7 @@ export default async function RankingsPage({ searchParams }: { searchParams: Pro
             </div>
           </div>
           <p className="mb-4 max-w-[760px] text-[13px] text-ink-2">{r.description}</p>
-          {r.rows.length ? <RankingTable rows={r.rows} scaleMax={r.origin === "external" && r.rows[0]?.value <= 100 ? 100 : undefined} /> : <div className="rounded-lg border border-line bg-surface"><EmptyState title="No models qualify" body="Try removing the capability filter." /></div>}
+          {r.rows.length ? <RankingTable rows={r.rows} scaleMax={r.origin === "external" && r.rows[0]?.value <= 100 ? 100 : undefined} /> : <div className="rounded-none border border-line bg-surface"><EmptyState title="No models qualify" body="Try removing the capability filter." /></div>}
         </div>
 
         <aside className="flex flex-col gap-4">
@@ -95,7 +95,7 @@ export default async function RankingsPage({ searchParams }: { searchParams: Pro
             </Suspense>
           )}
           {(q.category === "design" || q.benchmark) && (
-            <div className="rounded-lg border border-line bg-surface p-4">
+            <div className="rounded-none border border-line bg-surface p-4">
               <div className="mb-2 text-[13px] font-medium text-ink">Benchmark</div>
               <ul className="flex flex-col">
                 {designBenches.map((b) => (
@@ -109,7 +109,7 @@ export default async function RankingsPage({ searchParams }: { searchParams: Pro
               </ul>
             </div>
           )}
-          <div className="rounded-lg border border-line bg-surface p-4 text-[12.5px] leading-relaxed text-ink-2">
+          <div className="rounded-none border border-line bg-surface p-4 text-[12.5px] leading-relaxed text-ink-2">
             <div className="mb-1 text-[13px] font-medium text-ink">Reading these rankings</div>
             <ul className="list-disc space-y-1 pl-4">
               <li>

@@ -86,7 +86,7 @@ export async function getRankings(a: RankingArgs): Promise<{ title: string; desc
         rank: i + 1,
         model: toCard(m),
         value: isCtx ? (m.contextLength ?? 0) : Number(m.blendedPrice),
-        display: isCtx ? `${Math.round((m.contextLength ?? 0) / 1000).toLocaleString()}K` : `$${Number(m.blendedPrice).toFixed(3)}`,
+        display: isCtx ? `${Math.round((m.contextLength ?? 0) / 1000).toLocaleString("en-US")}K` : `$${Number(m.blendedPrice).toFixed(3)}`,
         origin: "specification" as const,
         source: "OpenRouter catalogue",
         observedAt: m.lastSyncedAt.toISOString(),
@@ -286,20 +286,14 @@ export async function getOverview() {
     take: 5,
     select: modelCardSelect,
   });
-  // price landscape: capability vs blended price for scatter chart
-  const landscape = await prisma.model.findMany({
-    where: { AND: [ACTIVE, { blendedPrice: { gt: 0 } }, { score: { capability: { not: null } } }] },
-    select: { slug: true, name: true, blendedPrice: true, lab: { select: { name: true, slug: true } }, score: { select: { capability: true, overall: true } }, results: { where: { benchmark: { slug: "aa-intelligence-index" } }, select: { score: true } } },
-  });
+  const landscape = await getLandscape();
   return {
     counts: { models, labs, providers, offerings, benchmarks, results, free, openWeights: open },
     byType: byType.map((t) => ({ type: t.type, count: t._count })).sort((a, b) => b.count - a.count),
     recent: recent.map(toCard),
     featured: featured.map(toCard),
     bestValue: bestValue.map(toCard),
-    landscape: landscape
-      .filter((l) => l.results[0])
-      .map((l) => ({ slug: l.slug, name: l.name, lab: l.lab.name, labSlug: l.lab.slug, price: Number(l.blendedPrice), intelligence: l.results[0].score })),
+    landscape,
     changes,
     lastSync: lastJob?.finishedAt?.toISOString() ?? null,
   };
@@ -392,4 +386,13 @@ export async function getEcosystem() {
     coverage: topLabs.map((l) => caps.map((c) => (l._count.models ? (capMap.get(`${l.id}:${c}`) ?? 0) / l._count.models : 0))),
     totals: { pairs: pairs.length, labs: labs.length, providers: providers.length },
   };
+}
+
+/** Every priced model with an AA Intelligence Index: the stations on the OneAtlas datum. */
+export async function getLandscape() {
+  const rows = await prisma.model.findMany({
+    where: { AND: [ACTIVE, { blendedPrice: { gt: 0 } }, { results: { some: { benchmark: { slug: "aa-intelligence-index" } } } }] },
+    select: { slug: true, name: true, blendedPrice: true, lab: { select: { name: true, slug: true } }, results: { where: { benchmark: { slug: "aa-intelligence-index" } }, select: { score: true } } },
+  });
+  return rows.map((l) => ({ slug: l.slug, name: l.name, lab: l.lab.name, labSlug: l.lab.slug, price: Number(l.blendedPrice), intelligence: l.results[0].score }));
 }

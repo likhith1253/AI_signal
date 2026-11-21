@@ -14,7 +14,7 @@ export function RankingTable({ rows, scaleMax }: { rows: RankingRow[]; scaleMax?
   const min = Math.min(...rows.map((r) => r.value), 0);
   const isElo = rows[0]?.display && rows[0].value > 200 && rows[0].origin === "external";
   return (
-    <div className="overflow-hidden rounded-lg border border-line bg-surface">
+    <div className="overflow-hidden rounded-none border border-line bg-surface">
       <div className="hidden grid-cols-[48px_minmax(0,1fr)_200px_110px_90px_36px] gap-3 border-b border-line bg-surface-2 px-4 py-2 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ink-3 md:grid">
         <span>Rank</span>
         <span>Model</span>

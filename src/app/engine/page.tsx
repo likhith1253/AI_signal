@@ -27,7 +27,7 @@ export default async function EnginePage({ searchParams }: { searchParams: Promi
 
   return (
     <>
-      <PageHeader
+      <PageHeader sheet="10"
         eyebrow="System"
         title={
           <>
@@ -80,7 +80,7 @@ export default async function EnginePage({ searchParams }: { searchParams: Promi
                       {j.errorCount > 0 && <span className="text-amber">{j.errorCount} rejected</span>}
                     </div>
                     {j.stages.length > 0 && (
-                      <div className="mt-2 flex h-[5px] overflow-hidden rounded-[2px] bg-surface-3" style={{ width: `${Math.max(12, (ms / maxMs) * 100)}%` }} title="stage time breakdown">
+                      <div className="mt-2 flex h-[5px] overflow-hidden rounded-none bg-surface-3" style={{ width: `${Math.max(12, (ms / maxMs) * 100)}%` }} title="stage time breakdown">
                         {j.stages.map((st, i) => (
                           <span key={st.stage} style={{ width: `${(st.ms / (ms || 1)) * 100}%`, background: i % 2 ? "var(--copper)" : "var(--accent)", opacity: 0.55 + (i % 3) * 0.15 }} title={`${st.stage} ${st.ms}ms`} />
                         ))}
@@ -144,17 +144,17 @@ export default async function EnginePage({ searchParams }: { searchParams: Promi
           <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
             <div>
               <h2 className="font-display text-[22px] text-ink">Change ledger</h2>
-              <p className="text-[12.5px] text-ink-3">{e.tables.change.toLocaleString()} events recorded. Append-only; produced by the diff stage.</p>
+              <p className="text-[12.5px] text-ink-3">{e.tables.change.toLocaleString("en-US")} events recorded. Append-only; produced by the diff stage.</p>
             </div>
             <div className="flex flex-wrap gap-1">
               {KINDS.map((k) => (
-                <Link key={k.label} href={k.key ? `/engine?kind=${k.key}#ledger` : "/engine#ledger"} className={cn("h-7 rounded-[4px] border px-2 text-[12px] leading-[26px]", (sp.kind ?? "") === k.key ? "border-ink bg-ink text-bg" : "border-line bg-surface text-ink-2")}>
+                <Link key={k.label} href={k.key ? `/engine?kind=${k.key}#ledger` : "/engine#ledger"} className={cn("h-7 rounded-none border px-2 text-[12px] leading-[26px]", (sp.kind ?? "") === k.key ? "border-ink bg-ink text-bg" : "border-line bg-surface text-ink-2")}>
                   {k.label}
                 </Link>
               ))}
             </div>
           </div>
-          <div className="rounded-lg border border-line bg-surface">
+          <div className="rounded-none border border-line bg-surface">
             <ChangeFeed items={feed} />
           </div>
         </section>

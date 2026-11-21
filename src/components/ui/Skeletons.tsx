@@ -6,7 +6,7 @@ export function ResultsSkeleton({ rows = 9 }: { rows?: number }) {
         <div className="skeleton h-5 w-24" />
         <div className="skeleton h-8 w-40" />
       </div>
-      <div className="overflow-hidden rounded-lg border border-line bg-surface">
+      <div className="overflow-hidden rounded-none border border-line bg-surface">
         {Array.from({ length: rows }).map((_, i) => (
           <div key={i} className="flex items-center gap-3 border-b border-line px-4 py-3 last:border-0">
             <div className="skeleton h-[30px] w-[30px]" />
@@ -23,5 +23,5 @@ export function ResultsSkeleton({ rows = 9 }: { rows?: number }) {
 }
 
 export function PanelSkeleton({ height = 220 }: { height?: number }) {
-  return <div className="skeleton w-full rounded-lg" style={{ height }} aria-busy="true" />;
+  return <div className="skeleton w-full rounded-none" style={{ height }} aria-busy="true" />;
 }

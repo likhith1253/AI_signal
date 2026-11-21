@@ -26,7 +26,7 @@ export function CapabilityIcons({ caps, max = 6, className }: { caps: string[]; 
       {sorted.slice(0, max).map((c) => {
         const I = CAP_ICONS[c].icon;
         return (
-          <span key={c} title={CAP_ICONS[c].label} className="flex h-5 w-5 items-center justify-center rounded-[3px] border border-line bg-surface-2">
+          <span key={c} title={CAP_ICONS[c].label} className="flex h-5 w-5 items-center justify-center rounded-none border border-line bg-surface-2">
             <I size={11} strokeWidth={1.8} aria-label={CAP_ICONS[c].label} />
           </span>
         );
@@ -45,7 +45,7 @@ export function CapabilityChip({ slug }: { slug: string }) {
   if (!c) return <Tag>{slug}</Tag>;
   const I = c.icon;
   return (
-    <span className="inline-flex h-6 items-center gap-1.5 rounded-[4px] border border-line bg-surface px-2 text-[12px] text-ink-2">
+    <span className="inline-flex h-6 items-center gap-1.5 rounded-none border border-line bg-surface px-2 text-[12px] text-ink-2">
       <I size={12} strokeWidth={1.8} className="text-accent" />
       {c.label}
     </span>
@@ -60,7 +60,7 @@ export function ModalityStrip({ input, output }: { input: string[]; output: stri
     <span
       key={m}
       title={m}
-      className={cn("num flex h-[18px] w-[16px] items-center justify-center rounded-[2px] text-[9.5px]", on ? "bg-ink text-bg" : "bg-surface-3 text-ink-3/60")}
+      className={cn("num flex h-[18px] w-[16px] items-center justify-center rounded-none text-[9.5px]", on ? "bg-ink text-bg" : "bg-surface-3 text-ink-3/60")}
     >
       {MODALITY_GLYPH[m]}
     </span>
@@ -79,18 +79,33 @@ export function TypeTag({ type }: { type: string }) {
   return <Tag tone={type === "REASONING" ? "accent" : type === "ROUTER" ? "amber" : type === "MULTIMODAL" ? "copper" : "neutral"}>{TYPE_LABELS[type] ?? type}</Tag>;
 }
 
-/** Atlas score with a confidence arc: the ring's filled share = data coverage. */
+/**
+ * Atlas score as a surveyed spot height: a trig-point triangle and the value,
+ * with a coverage rule underneath (how much of the score rests on data).
+ * No score → an open triangle marked "uns." (unsurveyed).
+ */
 export function ScoreDial({ score, confidence, size = 40 }: { score: number | null | undefined; confidence?: number | null; size?: number }) {
-  const r = size / 2 - 3;
-  const c = 2 * Math.PI * r;
   const conf = confidence ?? 0;
+  const big = size >= 48;
+  const tri = big ? 11 : 8;
   return (
-    <span className="relative inline-flex shrink-0 items-center justify-center" style={{ width: size, height: size }} title={score == null ? "Not enough data for an Atlas score" : `Atlas score ${score.toFixed(1)} · ${Math.round(conf * 100)}% data coverage`}>
-      <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--surface-3)" strokeWidth="2.5" />
-        {score != null && <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--accent)" strokeWidth="2.5" strokeDasharray={`${c * conf} ${c}`} strokeLinecap="round" />}
-      </svg>
-      <span className={cn("num absolute text-ink", size >= 48 ? "text-[15px]" : "text-[12px]")}>{score == null ? "—" : Math.round(score)}</span>
+    <span
+      className="inline-flex shrink-0 flex-col items-start justify-center"
+      style={{ minWidth: big ? 64 : 44 }}
+      title={score == null ? "Unsurveyed: not enough benchmark data for an Atlas score" : `Atlas score ${score.toFixed(1)} · ${Math.round(conf * 100)}% data coverage`}
+    >
+      <span className="flex items-center gap-1">
+        <svg width={tri} height={tri} viewBox="0 0 10 10" aria-hidden>
+          <path d="M5 1 L9.3 9 H0.7 Z" fill={score == null ? "none" : "var(--copper)"} stroke="var(--copper)" strokeWidth="1.2" />
+          {score != null && <circle cx="5" cy="6.2" r="1.1" fill="var(--surface)" />}
+        </svg>
+        <span className={cn("num leading-none", score == null ? "text-ink-3" : "text-ink", big ? "text-[19px]" : "text-[13px]")}>{score == null ? "uns." : score.toFixed(big ? 1 : 0)}</span>
+      </span>
+      {score != null && (
+        <span className="mt-1 block h-[2px] w-full bg-line">
+          <span className="block h-full bg-copper" style={{ width: `${conf * 100}%` }} />
+        </span>
+      )}
     </span>
   );
 }

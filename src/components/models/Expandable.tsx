@@ -35,7 +35,7 @@ export function CopyId({ value }: { value: string }) {
           setTimeout(() => setCopied(false), 1200);
         } catch {}
       }}
-      className="num inline-flex items-center gap-1.5 rounded-[4px] border border-line bg-surface-2 px-2 py-0.5 text-[12px] text-ink-2 hover:text-ink"
+      className="num inline-flex items-center gap-1.5 rounded-none border border-line bg-surface-2 px-2 py-0.5 text-[12px] text-ink-2 hover:text-ink"
       title="Copy model id"
     >
       {value}
