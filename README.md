@@ -10,7 +10,7 @@ Built as a full-stack internship assignment with Next.js 15 (App Router), React 
 
 ![OneAtlas walkthrough](docs/media/walkthrough.gif)
 
-▶ **[Full walkthrough video (MP4, ~2 min, captioned)](docs/media/walkthrough.mp4)**, recorded on the live deployment.
+▶ **[Full walkthrough video (MP4, ~2 min)](docs/media/walkthrough.mp4)**, recorded on the live deployment.
 
 ## Walkthrough: a guided tour
 
@@ -195,7 +195,7 @@ npm run dev                     # http://localhost:3000
 
 - **Unit (53 tests)** cover normalization (slugs, families, prices including tiers, time windows and free vs unknown), the diff engine (idempotency, price/offering/spec/benchmark changes), scoring (percentiles, log-scaled cost, coverage threshold, custom weights), the recommender, the Pareto frontier, validation and query building.
 - **Integration (16 tests)** call the real route handlers against PostgreSQL. They cover pagination, AND-semantics filters, sort order with unknowns last, price ceilings excluding unknown prices, 400/404 handling, search ranking, compare alignment, ranking origins and order, recommendation constraints, and auth on ingestion. They also check data integrity: no duplicate offerings, aggregates match offerings, percentile bounds, and no overall score below the coverage threshold.
-- **End-to-end (21 Playwright tests, desktop + Pixel 7)** cover navigation, ⌘K search, discovery filters/sort/pagination, model detail, the full compare flow including a shared link in a fresh context, rankings and weight tuning, the workload finder, directories, the engine, theme persistence and system preference, zero console errors, the mobile drawer, the filter sheet, and no horizontal overflow.
+- **End-to-end (22 Playwright tests, desktop + Pixel 7)** cover navigation, ⌘K search, discovery filters/sort/pagination, model detail, the full compare flow including a shared link in a fresh context, rankings and weight tuning, the workload finder, directories, the engine, theme persistence and system preference, zero console errors, the mobile drawer, the filter sheet, and no horizontal overflow.
 
 ## Deployment
 
