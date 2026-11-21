@@ -157,7 +157,7 @@ export function recommend(cands: Candidate[], w: Workload, k: Constraints = {}, 
   return cands
     .filter((c) => meetsRequirements(c, w, k))
     .map((c) => {
-      const comp = composite(c.dimensions, w.weights);
+      const comp = composite(c.dimensions, w.weights, 0);
       return { c, comp };
     })
     .filter(({ comp }) => comp.overall != null && comp.confidence >= minConfidence)
