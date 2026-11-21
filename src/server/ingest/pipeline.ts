@@ -19,7 +19,6 @@ import {
   type ORProvider,
 } from "./openrouter/schemas";
 import {
-  blendedPrice,
   CAPABILITIES,
   classifyModelType,
   cleanDescription,

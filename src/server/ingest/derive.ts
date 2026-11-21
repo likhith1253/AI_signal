@@ -8,7 +8,7 @@
  */
 import type { PrismaClient } from "@prisma/client";
 import { blendedPrice } from "./normalize";
-import { composite, METHODOLOGY, percentile, scoreModel, type Population, type ScoreInput } from "../scoring/engine";
+import { composite, METHODOLOGY, scoreModel, type Population, type ScoreInput } from "../scoring/engine";
 
 const asc = (xs: number[]) => [...xs].sort((a, b) => a - b);
 
@@ -53,18 +53,20 @@ export async function deriveAll(db: PrismaClient): Promise<{ scored: number; per
   }
 
   // ── benchmark percentiles ──
-  const benchmarks = await db.benchmark.findMany({ select: { id: true, higherIsBetter: true, results: { select: { id: true, score: true } } } });
-  let percentiles = 0;
-  const updates = [];
-  for (const b of benchmarks) {
-    const sorted = asc(b.results.map((r) => r.score));
-    for (const r of b.results) {
-      const pct = percentile(sorted, r.score) / 100;
-      updates.push(db.benchmarkResult.update({ where: { id: r.id }, data: { percentile: b.higherIsBetter ? pct : 1 - pct } }));
-      percentiles++;
-    }
-  }
-  for (let i = 0; i < updates.length; i += 400) await db.$transaction(updates.slice(i, i + 400));
+  // One set-based statement instead of N updates. Mid-rank percentile:
+  // (models strictly below + half of ties) / models on that benchmark — the
+  // same definition as engine.percentile(), so traces and stored values agree.
+  const percentiles = await db.$executeRaw`
+    UPDATE "BenchmarkResult" AS br
+    SET "percentile" = CASE WHEN b."higherIsBetter" THEN sub.p ELSE 1 - sub.p END
+    FROM (
+      SELECT id, "benchmarkId",
+        ((RANK() OVER w - 1) + (COUNT(*) OVER (PARTITION BY "benchmarkId", score)) / 2.0)
+          / COUNT(*) OVER (PARTITION BY "benchmarkId") AS p
+      FROM "BenchmarkResult"
+      WINDOW w AS (PARTITION BY "benchmarkId" ORDER BY score)
+    ) AS sub, "Benchmark" AS b
+    WHERE br.id = sub.id AND b.id = sub."benchmarkId"`;
 
   // ── population for scoring ──
   const bench = (m: (typeof models)[number], slug: string) => m.results.find((r) => r.benchmark.slug === slug)?.score ?? null;

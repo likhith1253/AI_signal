@@ -245,6 +245,13 @@ export const DEFAULT_WEIGHTS: Required<Weights> = {
   versatility: 0.1,
 };
 
+/**
+ * An overall score is only published when at least this share of the weight is
+ * backed by data. With default weights, benchmark dimensions carry 45%, so a
+ * model with no benchmark signal at all can never receive an overall score.
+ */
+export const MIN_CONFIDENCE = 0.6;
+
 export interface Composite {
   overall: number | null;
   /** share of total weight that was backed by data (0–1) */
@@ -256,7 +263,7 @@ export interface Composite {
  * Weighted mean over dimensions that have data. Weights of missing dimensions
  * are redistributed proportionally; `confidence` reports how much was missing.
  */
-export function composite(dims: Record<DimensionKey, number | null>, weights: Weights = DEFAULT_WEIGHTS): Composite {
+export function composite(dims: Record<DimensionKey, number | null>, weights: Weights = DEFAULT_WEIGHTS, minConfidence = MIN_CONFIDENCE): Composite {
   const entries = (Object.keys(weights) as DimensionKey[])
     .map((k) => ({ key: k, weight: Math.max(0, weights[k] ?? 0) }))
     .filter((e) => e.weight > 0);
@@ -272,7 +279,8 @@ export function composite(dims: Record<DimensionKey, number | null>, weights: We
     return { key: e.key, weight: e.weight / total, score, contribution: round1(contribution) };
   });
   const overall = round1(available.reduce((s, e) => s + (dims[e.key] as number) * e.weight, 0) / availWeight);
-  return { overall, confidence: Math.round((availWeight / total) * 100) / 100, contributions };
+  const confidence = Math.round((availWeight / total) * 100) / 100;
+  return { overall: confidence >= minConfidence ? overall : null, confidence, contributions };
 }
 
 /** Parse "capability:0.5,value:0.3" from a query string into weights. */
