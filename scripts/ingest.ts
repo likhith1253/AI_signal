@@ -1,9 +1,4 @@
-/**
- * Atlas Engine CLI.
- *   npm run ingest            plan + apply against DATABASE_URL
- *   npm run ingest -- --plan  dry run: print the changeset, write nothing
- *   npm run derive            recompute aggregates, percentiles and scores only
- */
+/** CLI: npm run ingest (add -- --plan for a dry run), npm run derive. */
 import { PrismaClient } from "@prisma/client";
 import { runIngest } from "../src/server/ingest/pipeline";
 import { deriveAll } from "../src/server/ingest/derive";

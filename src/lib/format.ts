@@ -1,4 +1,4 @@
-/** Display formatting. Unknown is always shown as unknown — never as 0. */
+/** Display formatting. Unknown is always shown as unknown - never as 0. */
 
 export function fmtPrice(v: number | null | undefined, opts: { free?: boolean; variable?: boolean; unit?: string } = {}): string {
   if (opts.variable) return "Variable";

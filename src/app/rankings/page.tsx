@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { rankingsQuery, searchParamsToObject } from "@/lib/validation";
-import { getRankings, listBenchmarks } from "@/server/queries/intelligence";
+import { getAvailableCategories, getRankings, listBenchmarks } from "@/server/queries/intelligence";
 import { parseWeights } from "@/server/scoring/engine";
 import { Container, Origin, PageHeader } from "@/components/ui/primitives";
 import { RankingTable } from "@/components/rankings/RankingTable";
@@ -35,7 +35,10 @@ export default async function RankingsPage({ searchParams }: { searchParams: Pro
   const raw = searchParamsToObject(await searchParams);
   const parsed = rankingsQuery.safeParse(raw);
   const q = parsed.success ? parsed.data : rankingsQuery.parse({});
-  const [r, benchmarks] = await Promise.all([getRankings({ ...q, weights: parseWeights(q.weights) }), listBenchmarks()]);
+  const [r, benchmarks, available] = await Promise.all([getRankings({ ...q, weights: parseWeights(q.weights) }), listBenchmarks(), getAvailableCategories()]);
+  const codingFallback = !benchmarks.some((b) => b.slug === "aa-coding-index" && b.coverage > 0);
+  // hide leaderboards whose benchmark the source doesn't currently publish
+  const tabs = CATEGORIES.filter((c) => available[c.key] !== false).map((c) => (c.key === "coding" && codingFallback ? { ...c, hint: "Design Arena code Elo" } : c));
   const designBenches = benchmarks.filter((b) => b.category === "design" || b.category === "domain");
   const href = (patch: Record<string, string | null>) => {
     const p = new URLSearchParams();
@@ -48,7 +51,7 @@ export default async function RankingsPage({ searchParams }: { searchParams: Pro
     <>
       <PageHeader sheet="05" eyebrow="Leaderboards" title="Rankings" description="Every leaderboard states where its numbers come from: an independent benchmark, a vendor specification, or a OneAtlas-derived composite. Different scales are never mixed in one ranking.">
         <div className="scrollbar-thin -mx-1 flex gap-1 overflow-x-auto px-1 pb-1" role="tablist">
-          {CATEGORIES.map((c) => (
+          {tabs.map((c) => (
             <Link
               key={c.key}
               href={href({ category: c.key, benchmark: null, weights: null })}
@@ -85,7 +88,7 @@ export default async function RankingsPage({ searchParams }: { searchParams: Pro
             </div>
           </div>
           <p className="mb-4 max-w-[760px] text-[13px] text-ink-2">{r.description}</p>
-          {r.rows.length ? <RankingTable rows={r.rows} scaleMax={r.origin === "external" && r.rows[0]?.value <= 100 ? 100 : undefined} /> : <div className="rounded-none border border-line bg-surface"><EmptyState title="No models qualify" body="Try removing the capability filter." /></div>}
+          {r.rows.length ? <RankingTable rows={r.rows} scaleMax={r.origin === "external" && r.rows[0]?.value <= 100 ? 100 : undefined} /> : <div className="rounded-none border border-line bg-surface"><EmptyState title="No models qualify" body={q.capability.length ? "Try removing the capability filter." : "The source doesn't publish data for this leaderboard right now."} /></div>}
         </div>
 
         <aside className="flex flex-col gap-4">

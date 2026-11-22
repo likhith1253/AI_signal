@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
  * POST /api/ingest?plan=1    dry run: returns the changeset without writing catalogue data
  */
 export const POST = handler(async (req) => {
-  const limited = rateLimit(req, 5);
+  const limited = rateLimit(req, 5, "ingest");
   if (limited) return limited;
   requireBearer(req, process.env.INGEST_SECRET);
   const plan = new URL(req.url).searchParams.get("plan") === "1";

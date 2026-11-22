@@ -118,6 +118,23 @@ describe.runIf(seeded)("API (database-backed)", () => {
     expect((await custom.json()).meta.weights).toEqual({ costEfficiency: 1 });
   });
 
+  it("every leaderboard shown on the rankings page has rows", async () => {
+    const { getAvailableCategories } = await import("@/server/queries/intelligence");
+    const available = await getAvailableCategories();
+    const categories = ["overall", "intelligence", "coding", "agentic", "design", "value", "long-context", "cheapest"].filter((c) => available[c] !== false);
+    expect(categories).toContain("coding"); // falls back to Design Arena code Elo when AA stops publishing
+    for (const category of categories) {
+      const body = await (await rankings(req(`/api/rankings?category=${category}&limit=5`), undefined as never)).json();
+      expect(body.data.length, category).toBeGreaterThan(0);
+    }
+  });
+
+  it("rejects malformed weights, accepts sort=price, 404s a compare of unknown models", async () => {
+    expect((await rankings(req("/api/rankings?weights=capability:abc"), undefined as never)).status).toBe(400);
+    expect((await listModels(req("/api/models?sort=price&pageSize=3"), undefined as never)).status).toBe(200);
+    expect((await compare(req("/api/compare?models=nope-a,nope-b"), undefined as never)).status).toBe(404);
+  });
+
   it("directory endpoints keep labs and providers separate", async () => {
     const l = await (await labs(req("/api/labs"), undefined as never)).json();
     const p = await (await providers(req("/api/providers"), undefined as never)).json();

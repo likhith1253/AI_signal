@@ -38,7 +38,7 @@ export default async function LabPage({ params }: { params: Promise<{ slug: stri
                 <h1 className="font-display text-[36px] leading-tight text-ink">{lab.name}</h1>
                 <div className="mt-1 text-[13px] text-ink-3">{[lab.headquarters, lab.foundedYear && `Founded ${lab.foundedYear}`].filter(Boolean).join(" · ")}</div>
                 {lab.description && <p className="mt-3 max-w-[640px] text-[14.5px] leading-relaxed text-ink-2">{lab.description}</p>}
-                {!lab.isCurated && <p className="mt-2 text-[12px] text-ink-3">Profile inferred from catalogue identifiers — not curated.</p>}
+                {!lab.isCurated && <p className="mt-2 text-[12px] text-ink-3">Profile inferred from catalogue identifiers - not curated.</p>}
               </div>
             </div>
             {lab.website && (

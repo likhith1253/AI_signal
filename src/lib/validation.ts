@@ -33,7 +33,8 @@ export const modelListQuery = z.object({
   free: bool,
   openWeights: bool,
   includeInactive: bool,
-  sort: z.enum(MODEL_SORTS).default("score"),
+  // "price" is accepted as an alias for the blended price
+  sort: z.preprocess((v) => (v === "price" ? "blended" : v), z.enum(MODEL_SORTS).default("score")),
   order: z.enum(["asc", "desc"]).optional(),
   page: z.coerce.number().int().min(1).max(1000).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(24),

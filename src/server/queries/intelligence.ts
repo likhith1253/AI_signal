@@ -20,8 +20,6 @@ export interface RankingRow {
   confidence?: number;
 }
 
-// ─────────────────────────── rankings ───────────────────────────
-
 interface RankingArgs {
   category: string;
   benchmark?: string;
@@ -39,15 +37,35 @@ function baseWhere(a: RankingArgs): Prisma.ModelWhereInput {
   return { AND: and };
 }
 
+/** Benchmarks backing each external leaderboard, in order of preference. */
+export const CATEGORY_BENCHMARKS: Record<string, string[]> = {
+  intelligence: ["aa-intelligence-index"],
+  coding: ["aa-coding-index", "design-arena-codecategories"],
+  agentic: ["aa-agentic-index"],
+  design: ["design-arena-codecategories"],
+};
+
+/** Categories whose leaderboard currently has data (so empty tabs can be hidden). */
+export async function getAvailableCategories() {
+  const withData = await prisma.benchmark.findMany({ where: { results: { some: {} } }, select: { slug: true } });
+  const have = new Set(withData.map((b) => b.slug));
+  return Object.fromEntries(Object.entries(CATEGORY_BENCHMARKS).map(([k, slugs]) => [k, slugs.some((s) => have.has(s))]));
+}
+
 export async function getRankings(a: RankingArgs): Promise<{ title: string; description: string; origin: ScoreOrigin; rows: RankingRow[]; weights?: Weights }> {
   const where = baseWhere(a);
 
-  // external benchmark leaderboards
-  const benchSlug =
-    a.category === "intelligence" ? "aa-intelligence-index" : a.category === "coding" ? "aa-coding-index" : a.category === "agentic" ? "aa-agentic-index" : a.category === "design" ? a.benchmark ?? "design-arena-codecategories" : a.benchmark;
-  if (benchSlug && (["intelligence", "coding", "agentic", "design"].includes(a.category) || a.benchmark)) {
-    const bench = await prisma.benchmark.findUnique({ where: { slug: benchSlug }, include: { source: true } });
-    if (!bench) return { title: "Unknown benchmark", description: "", origin: "external", rows: [] };
+  // external benchmark leaderboards. An explicit ?benchmark= wins for any category;
+  // otherwise use the first benchmark in the category's list that has results
+  // (upstream sometimes stops publishing an index, e.g. AA coding).
+  const candidates = a.benchmark ? [a.benchmark] : (CATEGORY_BENCHMARKS[a.category] ?? []);
+  if (candidates.length) {
+    const benches = await prisma.benchmark.findMany({
+      where: { slug: { in: candidates }, results: { some: {} } },
+      include: { source: true },
+    });
+    const bench = candidates.map((s) => benches.find((b) => b.slug === s)).find(Boolean);
+    if (!bench) return { title: a.benchmark ? `No results for "${a.benchmark}"` : "No benchmark data yet", description: "The source does not currently publish this benchmark.", origin: "external", rows: [] };
     const results = await prisma.benchmarkResult.findMany({
       where: { benchmarkId: bench.id, model: where },
       orderBy: [{ score: bench.higherIsBetter ? "desc" : "asc" }, { model: { slug: "asc" } }],
@@ -132,8 +150,6 @@ export async function getRankings(a: RankingArgs): Promise<{ title: string; desc
   };
 }
 
-// ─────────────────────────── benchmarks ───────────────────────────
-
 export async function listBenchmarks() {
   const b = await prisma.benchmark.findMany({ include: { source: true, _count: { select: { results: true } } }, orderBy: [{ category: "asc" }, { name: "asc" }] });
   return b.map((x) => ({
@@ -174,8 +190,6 @@ export async function getBenchmarkMatrix(benchmarkSlugs: string[], limit: number
   };
 }
 
-// ─────────────────────────── compare ───────────────────────────
-
 export async function compareModels(slugs: string[]) {
   const details = await Promise.all(slugs.map((s) => getModel(s)));
   const found = details.filter((d): d is NonNullable<typeof d> => !!d);
@@ -193,8 +207,6 @@ export async function compareModels(slugs: string[]) {
     dimensions: dims.map((k) => ({ key: k, label: DIMENSION_LABELS[k], values: found.map((f) => f.score?.traces.find((t) => t.key === k)?.score ?? null) })),
   };
 }
-
-// ─────────────────────────── search ───────────────────────────
 
 export async function search(q: string, limit: number) {
   const term = q.trim();
@@ -224,8 +236,6 @@ export async function search(q: string, limit: number) {
     providers: providers.map((p) => ({ slug: p.slug, name: p.name, offeringCount: p.offeringCount })),
   };
 }
-
-// ─────────────────────────── recommendations ───────────────────────────
 
 export async function getRecommendations(workloadSlug: string, k: Constraints, limit: number) {
   const workload = getWorkload(workloadSlug);
@@ -257,8 +267,6 @@ export async function getRecommendations(workloadSlug: string, k: Constraints, l
   return { workload, results: recs.map((r) => ({ ...r, model: toCard(cards.get(r.slug)!) })), candidates: candidates.length };
 }
 
-// ─────────────────────────── overview + engine telemetry ───────────────────────────
-
 export async function getOverview() {
   const [models, labs, providers, offerings, benchmarks, results, byType, recent, changes, lastJob, free, open] = await Promise.all([
     prisma.model.count({ where: ACTIVE }),
@@ -269,7 +277,7 @@ export async function getOverview() {
     prisma.benchmarkResult.count(),
     prisma.model.groupBy({ by: ["type"], where: ACTIVE, _count: true }),
     prisma.model.findMany({ where: ACTIVE, orderBy: { releasedAt: "desc" }, take: 8, select: modelCardSelect }),
-    getChangeFeed(12),
+    getChangeFeed(12, ["PRICE_CHANGED", "MODEL_ADDED", "MODEL_REMOVED", "OFFERING_ADDED", "OFFERING_REMOVED", "MODEL_UPDATED"]),
     prisma.ingestionJob.findFirst({ where: { dryRun: false, status: { in: ["SUCCEEDED", "PARTIAL"] } }, orderBy: { startedAt: "desc" } }),
     prisma.model.count({ where: { ...ACTIVE, isFree: true } }),
     prisma.model.count({ where: { ...ACTIVE, isOpenWeights: true } }),
@@ -349,8 +357,6 @@ export async function getEngineStatus() {
     tables: { model, lab, family, provider, offering, price, snapshot, benchmark, result, score, change, capability },
   };
 }
-
-// ─────────────────────────── ecosystem ───────────────────────────
 
 /** Lab × provider matrix ("who serves whom") and per-lab capability coverage. */
 export async function getEcosystem() {

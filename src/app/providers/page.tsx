@@ -16,7 +16,7 @@ export default async function ProvidersPage() {
       <PageHeader sheet="09"
         eyebrow="Directory"
         title="Providers"
-        description={`${providers.length} inference providers currently serving at least one model. A provider hosts models — often from many labs — at its own price, quantization and limits.`}
+        description={`${providers.length} inference providers currently serving at least one model. A provider hosts models - often from many labs - at its own price, quantization and limits.`}
       />
       <Container className="py-6">
         <div className="overflow-x-auto rounded-none border border-line bg-surface">

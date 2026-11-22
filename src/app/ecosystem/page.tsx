@@ -19,7 +19,7 @@ export default async function EcosystemPage() {
         description={`${e.totals.pairs} lab–provider relationships across ${e.totals.labs} labs and ${e.totals.providers} providers. Labs train models; providers decide where, how fast and at what price you can run them.`}
       />
       <Container className="flex flex-col gap-8 py-6">
-        <Panel title="Distribution matrix — number of a lab's models each provider serves" flush>
+        <Panel title="Distribution matrix - number of a lab's models each provider serves" flush>
           <div className="overflow-x-auto p-4">
             <table className="border-separate border-spacing-[3px] text-[11px]" data-testid="ecosystem-matrix">
               <thead>
@@ -70,7 +70,7 @@ export default async function EcosystemPage() {
           </div>
         </Panel>
 
-        <Panel title="Capability coverage — share of each lab's active models" flush>
+        <Panel title="Capability coverage - share of each lab's active models" flush>
           <div className="overflow-x-auto p-4">
             <table className="w-full min-w-[640px] text-[12px]">
               <thead>

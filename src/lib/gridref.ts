@@ -1,11 +1,4 @@
-/**
- * The OneAtlas datum. Every model with a known price and an AA Intelligence
- * Index has a fixed position on one sheet:
- *   x = blended price, log10 from $0.01 to $100 per 1M tokens  → columns A–M (no I)
- *   y = AA Intelligence Index, 80 at the top to 0 at the bottom → rows 1–8
- * The datum is fixed (not fitted to the data) so a grid reference such as
- * "F3" means the same thing next month as today.
- */
+/** The OneAtlas datum. */
 export const DATUM = {
   priceMin: 0.01,
   priceMax: 100,

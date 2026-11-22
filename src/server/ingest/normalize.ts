@@ -1,10 +1,8 @@
 /**
  * Pure normalization functions for the Atlas Engine.
- * No I/O here — everything is deterministic and unit-tested.
+ * No I/O here - everything is deterministic and unit-tested.
  */
 import type { ORModel, ORPricing } from "./openrouter/schemas";
-
-// ─────────────────────────── identity ───────────────────────────
 
 /** "anthropic/claude-sonnet-4.5" -> "anthropic-claude-sonnet-4-5" */
 export function modelSlug(externalId: string): string {
@@ -47,16 +45,7 @@ export function splitDisplayName(raw: string): { prefix: string | null; name: st
   return { prefix: null, name: raw.trim() };
 }
 
-/**
- * Derive a model family from its display name.
- * Rule: words before the first token containing a digit; when the first token
- * already contains a digit, use its alphabetic prefix.
- *   "Claude Sonnet 4.5"   -> "Claude Sonnet"
- *   "GPT-4o mini"         -> "GPT"
- *   "Llama 3.3 70B"       -> "Llama"
- *   "Qwen3 Coder 480B"    -> "Qwen"
- *   "Gemini 2.5 Flash"    -> "Gemini"
- */
+/** Derive a model family from its display name. */
 export function deriveFamily(name: string): string | null {
   const cleaned = name.replace(/\(.*?\)/g, " ").replace(/\s+/g, " ").trim();
   const tokens = cleaned.split(" ").filter(Boolean);
@@ -77,8 +66,6 @@ export function deriveFamily(name: string): string | null {
   if (parts.length > 2) family = parts.slice(0, 2).join(" ");
   return family.length >= 2 ? family : null;
 }
-
-// ─────────────────────────── pricing ───────────────────────────
 
 export type PriceComponentKey =
   | "INPUT"
@@ -124,12 +111,7 @@ const PRICE_MAP: Record<string, [PriceComponentKey, PriceUnitKey, number]> = {
   request: ["REQUEST", "PER_REQUEST", 1],
 };
 
-/**
- * Parse one source price value.
- * - undefined / "" / non-numeric -> undefined (unknown: no row is written)
- * - negative ("-1")              -> variable price (routers choose at request time)
- * - "0"                          -> genuinely free (0)
- */
+/** Parse one source price value. */
 export function parsePriceValue(
   raw: string | number | undefined | null,
   multiplier: number,
@@ -169,8 +151,6 @@ export function blendedPrice(input: number | null | undefined, output: number | 
   if (input == null || output == null) return null;
   return Math.round(((3 * input + output) / 4) * 1e6) / 1e6;
 }
-
-// ─────────────────────────── classification ───────────────────────────
 
 export type ModelTypeKey =
   | "CHAT"

@@ -1,6 +1,6 @@
 /**
  * The Atlas Engine diff stage. Compares the stored catalogue with an incoming
- * normalized catalogue and produces a changeset — the "plan" of an ingest run.
+ * normalized catalogue and produces a changeset - the "plan" of an ingest run.
  * Pure: no database access, fully unit-tested.
  */
 import type { NormalizedPrice } from "./normalize";
@@ -98,10 +98,11 @@ export function diffCatalog(prev: Map<string, CatalogModel>, next: CatalogModel[
       if (!nextTags.has(tag)) changes.push({ kind: "OFFERING_REMOVED", subject: s, field: tag });
     }
 
-    // benchmarks (tolerate float noise)
+    // benchmarks: log new results and moves of at least 1%; Elo ratings drift by a
+    // point or two every day and that isn't worth a ledger entry
     for (const [slug, score] of Object.entries(n.benchmarks)) {
       const before = p.benchmarks[slug];
-      if (before === undefined || Math.abs(before - score) > 1e-6)
+      if (before === undefined || Math.abs(before - score) >= Math.max(0.5, Math.abs(before) * 0.01))
         changes.push({ kind: "BENCHMARK_CHANGED", subject: s, field: slug, before: before ?? null, after: score });
     }
   }

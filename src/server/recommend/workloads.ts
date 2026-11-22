@@ -1,10 +1,4 @@
-/**
- * Layer 6 — workload-based discovery.
- * A workload is a declarative profile: hard requirements (filters) + a weight
- * vector over Atlas dimensions. The recommender is deterministic and returns
- * human-readable reasons for every pick. A future learned/LLM recommender can
- * implement the same `Recommender` interface without touching callers.
- */
+/** Workload profiles and a deterministic recommender. */
 import { composite, type DimensionKey, type Weights } from "../scoring/engine";
 
 export interface Workload {
@@ -135,20 +129,20 @@ export function explain(c: Candidate, w: Workload): { reasons: string[]; caveats
   for (const key of ranked) {
     const s = d[key];
     if (s == null) {
-      if ((w.weights[key] ?? 0) >= 0.2) caveats.push(`No ${key === "capability" ? "intelligence" : key} benchmark data — ranked on other signals`);
+      if ((w.weights[key] ?? 0) >= 0.2) caveats.push(`No ${key === "capability" ? "intelligence" : key} benchmark data, ranked on other signals`);
       continue;
     }
     if (key === "coding" && s >= 60) reasons.push(`Coding benchmarks: ${ordinal(s)} of indexed models`);
     if (key === "capability" && s >= 60) reasons.push(`Intelligence index: ${ordinal(s)} of indexed models`);
     if (key === "agentic" && s >= 60) reasons.push(`Agentic index: ${ordinal(s)}`);
     if (key === "costEfficiency" && s >= 60)
-      reasons.push(c.isFree ? "Free to use" : `$${c.blendedPrice?.toFixed(2)}/M blended — cheaper than most`);
+      reasons.push(c.isFree ? "Free to use" : `$${c.blendedPrice?.toFixed(2)}/M blended, cheaper than most`);
     if (key === "value" && s >= 65) reasons.push("Strong capability per dollar");
     if (key === "context" && s >= 70 && c.contextLength) reasons.push(`${Math.round(c.contextLength / 1000)}K-token context window`);
     if (key === "availability" && c.providerCount >= 3) reasons.push(`Served by ${c.providerCount} providers`);
   }
-  if (c.isOpenWeights) reasons.push("Open weights — can be self-hosted");
-  if (c.providerCount === 1) caveats.push("Single provider — no failover");
+  if (c.isOpenWeights) reasons.push("Open weights, can be self-hosted");
+  if (c.providerCount === 1) caveats.push("Single provider, no failover");
   return { reasons: reasons.slice(0, 4), caveats: caveats.slice(0, 2) };
 }
 

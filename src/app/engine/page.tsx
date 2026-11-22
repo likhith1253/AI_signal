@@ -34,7 +34,7 @@ export default async function EnginePage({ searchParams }: { searchParams: Promi
             Atlas Engine <span className="text-ink-3">— plan, apply, diff</span>
           </>
         }
-        description="Every sync runs a staged pipeline. Before writing, it diffs the incoming catalogue against what is stored; that changeset is written to an append-only ledger. History is observed, never back-filled — the evolution data on model pages grows from these runs."
+        description="Each sync runs the pipeline below. Before writing anything it compares the new catalogue with the database, and every difference is saved to the change log. Price history on model pages comes from these runs."
       />
       <Container className="flex flex-col gap-8 py-6">
         <section>
@@ -92,7 +92,7 @@ export default async function EnginePage({ searchParams }: { searchParams: Promi
                           <ul className="num max-h-[160px] overflow-y-auto rounded border border-line bg-surface-2 p-2 text-[11px] text-ink-2">
                             {j.errors.map((er, i) => (
                               <li key={i} className="truncate">
-                                <span className="text-ink">{er.ref}</span> — {er.message}
+                                <span className="text-ink">{er.ref}</span> - {er.message}
                               </li>
                             ))}
                           </ul>
@@ -125,7 +125,7 @@ export default async function EnginePage({ searchParams }: { searchParams: Promi
             <Panel title="Run it yourself">
               <div className="flex flex-col gap-2 text-[12px]">
                 {[
-                  ["Dry run — print the changeset", "npm run ingest -- --plan"],
+                  ["Dry run - print the changeset", "npm run ingest -- --plan"],
                   ["Apply", "npm run ingest"],
                   ["Recompute scores only", "npm run derive"],
                   ["Remote (bearer token)", "POST /api/ingest?plan=1"],

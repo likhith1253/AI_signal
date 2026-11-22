@@ -57,6 +57,14 @@ describe("diffCatalog", () => {
     expect(changes).toContainEqual({ kind: "PRICE_CHANGED", subject: "acme/one", field: "deepinfra:OUTPUT@0", before: 3, after: null });
   });
 
+  it("ignores benchmark jitter below 1% but records new results and real moves", () => {
+    const prev = new Map([["acme/one", model({ benchmarks: { "design-arena-website": 1392, "aa-intelligence-index": 50 } })]]);
+    const next = model({ benchmarks: { "design-arena-website": 1391, "aa-intelligence-index": 53, "aa-coding-index": 40 } });
+    const fields = diffCatalog(prev, [next]).map((c) => c.field);
+    expect(fields).not.toContain("design-arena-website");
+    expect(fields).toEqual(expect.arrayContaining(["aa-intelligence-index", "aa-coding-index"]));
+  });
+
   it("detects offerings added/removed, spec and benchmark changes", () => {
     const prev = new Map([["acme/one", model()]]);
     const next = model({ contextLength: 256000, offerings: [{ tag: "groq", prices: [] }], benchmarks: { "aa-intelligence-index": 52, "aa-coding-index": 40 } });

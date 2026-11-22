@@ -48,7 +48,6 @@ export default async function Home() {
 
   return (
     <div>
-      {/* ── title block ── */}
       <section className="px-4 pt-6 md:px-8">
         <div className="mx-auto max-w-[1320px]">
           <div className="flex items-center gap-3 text-[10.5px] text-ink-3">
@@ -82,8 +81,6 @@ export default async function Home() {
           <WelcomeCard />
         </div>
       </section>
-
-      {/* ── the map ── */}
       <section className="px-4 pt-5 md:px-8">
         <div className="mx-auto grid max-w-[1320px] gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
           <div className="ticked min-w-0 border border-ink bg-surface-2/40 p-2 md:p-3">

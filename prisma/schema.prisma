@@ -1,14 +1,4 @@
-// OneAtlas — Atlas Intelligence Engine schema
-//
-// Layers:
-//   1. Registry      Lab, ModelFamily, Model, Modality, Capability
-//   2. Providers     Provider, Offering (model x provider availability)
-//   3. Pricing       Price (current, per offering/component/tier), PriceSnapshot (history)
-//   4. Benchmarks    Benchmark, BenchmarkResult
-//   5. Atlas Score   ModelScore (materialized, versioned methodology)
-//   7. Ingestion     DataSource, IngestionJob
-//
-// Layer 6 (recommendation) is pure application logic over these tables.
+// OneAtlas schema. Model identity is separate from provider offerings and their prices.
 
 generator client {
   provider = "prisma-client-js"
@@ -19,8 +9,6 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
-
-// ─────────────────────────── Provenance ───────────────────────────
 
 enum SourceKind {
   API // fetched from a public API
@@ -107,8 +95,6 @@ model ChangeEvent {
   @@index([modelId, createdAt])
   @@index([kind, createdAt])
 }
-
-// ─────────────────────────── Layer 1: Registry ───────────────────────────
 
 model Lab {
   id           String        @id @default(cuid())
@@ -260,8 +246,6 @@ model ModelCapability {
   @@index([capabilityId])
 }
 
-// ─────────────────────────── Layer 2: Provider intelligence ───────────────────────────
-
 model Provider {
   id               String     @id @default(cuid())
   slug             String     @unique
@@ -311,8 +295,6 @@ model Offering {
   @@unique([modelId, tag])
   @@index([providerId])
 }
-
-// ─────────────────────────── Layer 3: Pricing intelligence ───────────────────────────
 
 enum PriceComponent {
   INPUT
@@ -369,8 +351,6 @@ model PriceSnapshot {
   @@index([offeringId, component, capturedAt])
 }
 
-// ─────────────────────────── Layer 4: Benchmark intelligence ───────────────────────────
-
 model Benchmark {
   id             String            @id @default(cuid())
   slug           String            @unique
@@ -415,8 +395,6 @@ model BenchmarkResult {
   @@index([modelId])
   @@index([benchmarkId, score])
 }
-
-// ─────────────────────────── Layer 5: Atlas Intelligence Score ───────────────────────────
 
 /// Materialized per-dimension scores (0–100, null = insufficient data).
 /// Custom weightings are recomputed on read from these columns.

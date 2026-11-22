@@ -11,7 +11,7 @@ export function HeroSearch() {
       data-testid="hero-search"
     >
       <Search size={17} className="text-ink-2" />
-      <span className="flex-1">Locate a model — try “claude”, “qwen coder” or “groq”</span>
+      <span className="flex-1">Locate a model - try “claude”, “qwen coder” or “groq”</span>
       <span className="hidden items-center gap-0.5 sm:flex">
         <Kbd>Ctrl</Kbd>
         <Kbd>K</Kbd>

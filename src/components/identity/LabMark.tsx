@@ -1,9 +1,4 @@
-/**
- * Geological-unit identity marks. On a geological map every rock unit has a
- * colour, a hatch pattern and a short symbol ("Ka", "Tm"). OneAtlas treats labs
- * and providers the same way: a deterministic unit derived from the slug, never
- * a borrowed logo. Same slug → same unit, everywhere.
- */
+/** Geological-unit identity marks. */
 
 // [day stroke, day fill, night stroke, night fill]
 const UNITS: [string, string, string, string][] = [
@@ -63,7 +58,7 @@ export function LabMark({ slug, name, size = 28, className = "" }: { slug: strin
       className={`relative inline-flex shrink-0 overflow-hidden border border-[var(--u-s)] dark:border-[var(--u-ns)] ${className}`}
       style={{ width: size, height: size, ["--u-s" as string]: ds, ["--u-f" as string]: df, ["--u-ns" as string]: ns, ["--u-nf" as string]: nf }}
       role="img"
-      aria-label={name ? `${name} — map unit ${unitSymbol(slug)}` : undefined}
+      aria-label={name ? `${name} - map unit ${unitSymbol(slug)}` : undefined}
       title={name ? `${name} · unit ${unitSymbol(slug)}` : undefined}
     >
       <svg width={size} height={size} aria-hidden className="absolute inset-0">

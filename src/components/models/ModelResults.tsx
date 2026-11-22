@@ -115,7 +115,7 @@ export function ModelResults({ items, total, page, pageCount, sort }: { items: M
         <div className="rounded-none border border-line bg-surface">
           <EmptyState
             title="No models match these filters"
-            body="Loosen a constraint — price ceilings and capability combinations narrow results fastest."
+            body="Loosen a constraint - price ceilings and capability combinations narrow results fastest."
             action={
               <button onClick={() => update({ type: null, capability: null, modality: null, lab: null, provider: null, q: null, maxPrice: null, minContext: null, free: null, openWeights: null })} className="rounded-none border border-line-strong px-3 py-1.5 text-[13px] hover:bg-surface-2">
                 Reset filters
@@ -131,13 +131,13 @@ export function ModelResults({ items, total, page, pageCount, sort }: { items: M
 
       {pageCount > 1 && (
         <div className="mt-4 flex items-center justify-between text-[13px]">
-          <button disabled={page <= 1} onClick={() => update({ page: String(page - 1) }, { resetPage: false })} className="flex h-8 items-center gap-1 rounded-none border border-line bg-surface px-3 text-ink disabled:opacity-40" data-testid="prev-page">
+          <button disabled={page <= 1 || pending} onClick={() => update({ page: String(page - 1) }, { resetPage: false })} className="flex h-8 items-center gap-1 rounded-none border border-line bg-surface px-3 text-ink disabled:opacity-40" data-testid="prev-page">
             <ChevronLeft size={14} /> Previous
           </button>
           <span className="num text-ink-3">
             Page {page} of {pageCount}
           </span>
-          <button disabled={page >= pageCount} onClick={() => update({ page: String(page + 1) }, { resetPage: false })} className="flex h-8 items-center gap-1 rounded-none border border-line bg-surface px-3 text-ink disabled:opacity-40" data-testid="next-page">
+          <button disabled={page >= pageCount || pending} onClick={() => update({ page: String(page + 1) }, { resetPage: false })} className="flex h-8 items-center gap-1 rounded-none border border-line bg-surface px-3 text-ink disabled:opacity-40" data-testid="next-page">
             Next <ChevronRight size={14} />
           </button>
         </div>

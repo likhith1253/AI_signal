@@ -2,7 +2,7 @@ import { handler, HttpError, ok, parseQuery } from "@/lib/api";
 import { recommendQuery } from "@/lib/validation";
 import { getRecommendations } from "@/server/queries/intelligence";
 
-/** GET /api/recommend?workload=software-development&maxPrice=2 — deterministic, explained picks. */
+/** GET /api/recommend?workload=software-development&maxPrice=2 - deterministic, explained picks. */
 export const GET = handler(async (req) => {
   const q = parseQuery(recommendQuery, req.url);
   const r = await getRecommendations(q.workload, { maxBlendedPrice: q.maxPrice, minContext: q.minContext, openWeightsOnly: q.openWeights }, q.limit);

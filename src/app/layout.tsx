@@ -10,7 +10,7 @@ const serif = Spectral({ subsets: ["latin"], weight: ["400", "500"], style: ["it
 const mono = Martian_Mono({ subsets: ["latin"], variable: "--font-martian", display: "swap" });
 
 export const metadata: Metadata = {
-  title: { default: "OneAtlas — a survey of machine intelligence", template: "%s · OneAtlas" },
+  title: { default: "OneAtlas - a survey of machine intelligence", template: "%s · OneAtlas" },
   description: "Discover, compare and evaluate 470+ AI models across labs and providers, with explainable scoring, provider price comparison and a live change ledger.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
 };

@@ -1,11 +1,4 @@
-/**
- * Atlas Intelligence Score — methodology "atlas-v1".
- *
- * A pure, deterministic function. Given a model's facts and population
- * statistics for the whole catalogue it returns per-dimension scores (0–100)
- * AND a trace explaining how each number was produced. Nothing here is an
- * independent measurement: it is a transparent composite of published data.
- */
+/** Atlas Intelligence Score - methodology "atlas-v1". */
 
 export const METHODOLOGY = "atlas-v1";
 
@@ -75,13 +68,11 @@ export const DIMENSION_DESCRIPTIONS: Record<DimensionKey, string> = {
   coding: "Percentile of the AA Coding Index; falls back to Design Arena code-category Elo percentile.",
   agentic: "Percentile of the AA Agentic Index.",
   costEfficiency: "Cheapest 3:1 blended price on a log scale between the catalogue's 5th and 95th percentile.",
-  value: "Geometric mean of capability and cost efficiency — capability per dollar.",
+  value: "Geometric mean of capability and cost efficiency - capability per dollar.",
   context: "Context window on a log₂ scale from 8K (0) to 1M tokens (100).",
   availability: "Number of serving providers (log scale, 85%) and best 24h uptime (15%).",
   versatility: "Non-text input modalities plus tool calling, structured outputs and reasoning.",
 };
-
-// ─────────────────────────── math helpers ───────────────────────────
 
 const clamp = (v: number, lo = 0, hi = 100) => Math.min(hi, Math.max(lo, v));
 const round1 = (v: number) => Math.round(v * 10) / 10;
@@ -109,8 +100,6 @@ export function quantile(sorted: number[], q: number): number {
 const fmtUsd = (v: number) => (v < 0.01 ? `$${v.toFixed(4)}` : `$${v.toFixed(2)}`);
 const fmtTokens = (v: number) =>
   v >= 1_000_000 ? `${round1(v / 1_000_000)}M` : v >= 1000 ? `${Math.round(v / 1000)}K` : `${v}`;
-
-// ─────────────────────────── dimensions ───────────────────────────
 
 export function scoreModel(input: ScoreInput, pop: Population): ScoreResult {
   const traces: DimensionTrace[] = [];
@@ -229,8 +218,6 @@ export function scoreModel(input: ScoreInput, pop: Population): ScoreResult {
     traces,
   };
 }
-
-// ─────────────────────────── weighting ───────────────────────────
 
 export type Weights = Partial<Record<DimensionKey, number>>;
 

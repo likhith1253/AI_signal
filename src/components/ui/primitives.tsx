@@ -123,7 +123,7 @@ export function Stat({ label, value, sub, className }: { label: string; value: R
  */
 export function Meter({ value, className, tone = "accent", height = 6 }: { value: number | null | undefined; className?: string; tone?: "accent" | "copper" | "ink"; height?: number }) {
   const color = tone === "copper" ? "bg-copper" : tone === "ink" ? "bg-ink-2" : "bg-accent";
-  if (value == null) return <div className={cn("hatch w-full border border-line", className)} style={{ height }} title="Not surveyed — no data" />;
+  if (value == null) return <div className={cn("hatch w-full border border-line", className)} style={{ height }} title="Not surveyed - no data" />;
   return (
     <div
       className={cn("relative w-full border border-line-strong bg-surface", className)}

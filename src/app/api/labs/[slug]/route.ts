@@ -1,7 +1,7 @@
 import { handler, HttpError, ok } from "@/lib/api";
 import { getLab } from "@/server/queries/directory";
 
-/** GET /api/labs/:slug — lab profile, families, models and serving providers. */
+/** GET /api/labs/:slug - lab profile, families, models and serving providers. */
 export const GET = handler<{ params: Promise<{ slug: string }> }>(async (_req, { params }) => {
   const { slug } = await params;
   const lab = await getLab(slug.slice(0, 80));

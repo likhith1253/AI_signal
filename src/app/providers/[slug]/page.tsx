@@ -13,7 +13,7 @@ export const revalidate = 600;
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const p = await getProvider(slug);
-  return p ? { title: `${p.name} — provider`, description: `${p.offerings.length} models served by ${p.name}, with pricing and availability.` } : { title: "Provider not found" };
+  return p ? { title: `${p.name} - provider`, description: `${p.offerings.length} models served by ${p.name}, with pricing and availability.` } : { title: "Provider not found" };
 }
 
 export default async function ProviderPage({ params }: { params: Promise<{ slug: string }> }) {

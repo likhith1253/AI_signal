@@ -59,9 +59,9 @@ const SYMBOLS: { glyph: React.ReactNode; term: string; meaning: string }[] = [
     meaning: "A 0–100 composite of benchmarks, price, context, providers and features. The thin bar shows how much of it rests on real data.",
   },
   {
-    glyph: <span className="num text-[12px] text-ink-3">uns.</span>,
-    term: "Unsurveyed",
-    meaning: "Not enough published benchmarks to score fairly. Missing data is shown, never guessed.",
+    glyph: <span className="num text-[12px] text-ink-3">△ —</span>,
+    term: "No score",
+    meaning: "Not enough published benchmarks to score fairly, so we show a dash instead of guessing.",
   },
 ];
 

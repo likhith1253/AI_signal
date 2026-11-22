@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const m = await getModel(slug);
   if (!m) return { title: "Model not found" };
-  return { title: `${m.name} — ${m.lab.name}`, description: m.description?.slice(0, 160) ?? `${m.name} specifications, pricing and benchmarks.` };
+  return { title: `${m.name} - ${m.lab.name}`, description: m.description?.slice(0, 160) ?? `${m.name} specifications, pricing and benchmarks.` };
 }
 
 const CATEGORY_LABEL: Record<string, string> = { intelligence: "Intelligence", coding: "Coding", agentic: "Agentic", domain: "Domain indices", design: "Design Arena (human preference)" };
@@ -46,7 +46,6 @@ export default async function ModelPage({ params }: { params: Promise<{ slug: st
 
   return (
     <div>
-      {/* ── header ── */}
       <div className="paper-grid border-b border-line">
         <Container className="py-7">
           <div className="mb-4 flex flex-wrap items-center gap-1.5 text-[12.5px] text-ink-3">
@@ -119,12 +118,10 @@ export default async function ModelPage({ params }: { params: Promise<{ slug: st
           {m.description && (
             <p className="max-w-[760px] text-[15px] leading-relaxed text-ink-2">{m.description}</p>
           )}
-
-          {/* ── Atlas score ── */}
           {m.score && (
             <Panel
               id="score"
-              title="Why this score — Atlas Intelligence Score trace"
+              title="Why this score - Atlas Intelligence Score trace"
               action={
                 <Link href="/methodology" className="text-[12px] text-accent hover:underline">
                   Methodology {m.score.methodology}
@@ -177,14 +174,12 @@ export default async function ModelPage({ params }: { params: Promise<{ slug: st
                     </tbody>
                   </table>
                   <p className="mt-2 text-[11.5px] text-ink-3">
-                    Overall = Σ(score × weight) ÷ Σ(weights with data). A composite of published data — not an independent evaluation.
+                    Overall = Σ(score × weight) ÷ Σ(weights with data). A composite of published data - not an independent evaluation.
                   </p>
                 </div>
               </div>
             </Panel>
           )}
-
-          {/* ── providers ── */}
           <Panel id="providers" title={`Provider availability · ${active.length} active endpoint${active.length === 1 ? "" : "s"}`}>
             {m.offerings.length ? <ProviderPrices offerings={m.offerings} /> : <p className="text-[13px] text-ink-3">This is an alias; it has no endpoints of its own.</p>}
             {uniqueExtra.length > 0 && (
@@ -204,8 +199,6 @@ export default async function ModelPage({ params }: { params: Promise<{ slug: st
               </div>
             )}
           </Panel>
-
-          {/* ── benchmarks ── */}
           <Panel id="benchmarks" title={`Benchmarks · ${m.benchmarks.length} published results`}>
             {m.benchmarks.length === 0 ? (
               <p className="text-[13px] text-ink-3">No independent benchmark results are published for this model yet. Its Atlas score therefore omits the capability dimensions.</p>
@@ -245,9 +238,7 @@ export default async function ModelPage({ params }: { params: Promise<{ slug: st
               </div>
             )}
           </Panel>
-
-          {/* ── evolution ── */}
-          <Panel id="history" title="Evolution — observed changes">
+          <Panel id="history" title="Evolution - observed changes">
             {m.changes.length === 0 ? (
               <div className="flex items-start gap-3 text-[13px] text-ink-2">
                 <History size={16} className="mt-0.5 text-ink-3" />
@@ -277,8 +268,6 @@ export default async function ModelPage({ params }: { params: Promise<{ slug: st
             {priceEvents.length > 0 && <p className="mt-3 text-[11.5px] text-ink-3">Prices in USD per 1M tokens. Changes are recorded by the Atlas Engine diff stage, never back-filled.</p>}
           </Panel>
         </div>
-
-        {/* ── sidebar ── */}
         <aside className="flex flex-col gap-6">
           <Panel title={ref ? `Locator · ${ref}` : "Locator"} flush>
             {ref ? (
@@ -326,7 +315,7 @@ export default async function ModelPage({ params }: { params: Promise<{ slug: st
                 </div>
               )}
             </dl>
-            <p className="mt-3 border-t border-line pt-3 text-[11px] text-ink-3">Model-level values. Individual providers may cap context or output lower — see provider availability.</p>
+            <p className="mt-3 border-t border-line pt-3 text-[11px] text-ink-3">Model-level values. Individual providers may cap context or output lower - see provider availability.</p>
           </Panel>
 
           <Panel title="Capabilities">

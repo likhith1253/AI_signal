@@ -16,7 +16,7 @@ const STAGE_INFO: Record<string, { title: string; body: string }> = {
   endpoints: { title: "Endpoints", body: "Per-model provider endpoints, fetched with bounded concurrency and backoff." },
   normalize: { title: "Normalize", body: "Ids → slugs, prices → USD/1M, modality + capability derivation, family inference." },
   resolve: { title: "Resolve", body: "One identity per model; dedupe slugs, attach labs, families and providers." },
-  diff: { title: "Diff", body: "Compare against the stored catalogue to produce a changeset — the plan." },
+  diff: { title: "Diff", body: "Compare against the stored catalogue to produce a changeset - the plan." },
   commit: { title: "Commit", body: "Idempotent upserts; price snapshots and ledger events for every observed change." },
   derive: { title: "Derive", body: "Aggregates, benchmark percentiles (one SQL window query) and Atlas scores." },
 };

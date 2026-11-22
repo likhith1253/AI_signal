@@ -31,13 +31,7 @@ const ringsToPath = (coords: number[][][][]) =>
   coords.map((poly) => poly.map((ring) => `M${ring.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join("L")}Z`).join("")).join("");
 const sy = (v: number) => r2(M.t + v * IH);
 
-/**
- * The terrain of machine intelligence. Every benchmarked, priced model is a
- * survey station on the OneAtlas datum (log price × AA Intelligence Index).
- * Contours are a kernel-density estimate of where models cluster: hills are
- * crowded market segments, open ground is where nobody competes. The red ridge
- * is the Pareto frontier.
- */
+/** The terrain of machine intelligence. */
 export function TopoMap({ points, compact = false, highlight }: { points: TerrainPoint[]; compact?: boolean; highlight?: string }) {
   const router = useRouter();
   const reduce = useReducedMotion();

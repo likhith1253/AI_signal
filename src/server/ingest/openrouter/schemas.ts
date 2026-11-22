@@ -1,16 +1,6 @@
 import { z } from "zod";
 
-/**
- * Zod schemas for the public OpenRouter catalogue.
- * Verified against live responses of:
- *   GET https://openrouter.ai/api/v1/models
- *   GET https://openrouter.ai/api/v1/models/{author}/{slug}/endpoints
- *   GET https://openrouter.ai/api/v1/providers
- *
- * Schemas are intentionally permissive (passthrough on unknown keys, nullable
- * optional fields) so that an additive upstream change does not break ingestion,
- * while still rejecting records that lack the fields we depend on.
- */
+/** Zod schemas for the public OpenRouter catalogue. */
 
 /** OpenRouter quotes prices as decimal strings in USD per single token/unit. */
 const priceString = z.union([z.string(), z.number()]).transform((v) => String(v));

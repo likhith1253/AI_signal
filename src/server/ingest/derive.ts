@@ -1,11 +1,4 @@
-/**
- * Derive stage: recompute everything OneAtlas calculates from source data.
- *  - per-model price aggregates (cheapest offering, blended price, free flag)
- *  - provider counts
- *  - per-benchmark percentiles
- *  - Atlas Intelligence Score dimensions (materialized in ModelScore)
- * Idempotent: can be re-run at any time (`npm run derive`).
- */
+/** Derive stage: recompute everything OneAtlas calculates from source data. */
 import type { PrismaClient } from "@prisma/client";
 import { blendedPrice } from "./normalize";
 import { composite, METHODOLOGY, scoreModel, type Population, type ScoreInput } from "../scoring/engine";
@@ -27,8 +20,6 @@ export async function deriveAll(db: PrismaClient): Promise<{ scored: number; per
       results: { select: { score: true, benchmark: { select: { slug: true } } } },
     },
   });
-
-  // ── price aggregates ──
   type Agg = { minIn: number | null; minOut: number | null; blended: number | null; free: boolean; providers: number; uptime: number | null };
   const aggs = new Map<string, Agg>();
   for (const m of models) {
@@ -51,10 +42,8 @@ export async function deriveAll(db: PrismaClient): Promise<{ scored: number; per
     }
     aggs.set(m.id, { minIn, minOut, blended: best, free, providers: m.offerings.length, uptime });
   }
-
-  // ── benchmark percentiles ──
   // One set-based statement instead of N updates. Mid-rank percentile:
-  // (models strictly below + half of ties) / models on that benchmark — the
+  // (models strictly below + half of ties) / models on that benchmark - the
   // same definition as engine.percentile(), so traces and stored values agree.
   const percentiles = await db.$executeRaw`
     UPDATE "BenchmarkResult" AS br
@@ -67,8 +56,6 @@ export async function deriveAll(db: PrismaClient): Promise<{ scored: number; per
       WINDOW w AS (PARTITION BY "benchmarkId" ORDER BY score)
     ) AS sub, "Benchmark" AS b
     WHERE br.id = sub.id AND b.id = sub."benchmarkId"`;
-
-  // ── population for scoring ──
   const bench = (m: (typeof models)[number], slug: string) => m.results.find((r) => r.benchmark.slug === slug)?.score ?? null;
   const pop: Population = {
     intelligence: asc(models.map((m) => bench(m, "aa-intelligence-index")).filter((x): x is number => x != null)),
@@ -109,8 +96,6 @@ export async function deriveAll(db: PrismaClient): Promise<{ scored: number; per
     );
   }
   for (let i = 0; i < writes.length; i += 300) await db.$transaction(writes.slice(i, i + 300));
-
-  // ── provider offering counts ──
   const counts = await db.offering.groupBy({ by: ["providerId"], where: { isActive: true, model: { status: { not: "REMOVED" } } }, _count: true });
   await db.provider.updateMany({ data: { offeringCount: 0 } });
   await db.$transaction(counts.map((c) => db.provider.update({ where: { id: c.providerId }, data: { offeringCount: c._count } })));

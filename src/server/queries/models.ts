@@ -6,8 +6,6 @@ import { composite, DEFAULT_WEIGHTS, scoreModel } from "../scoring/engine";
 import { num } from "./util";
 import { gridRef } from "@/lib/gridref";
 
-// ─────────────────────────── list ───────────────────────────
-
 /** Pure: translate validated filters into a Prisma where clause. */
 export function buildModelWhere(q: Partial<ModelListQuery>): Prisma.ModelWhereInput {
   const and: Prisma.ModelWhereInput[] = [];
@@ -147,8 +145,6 @@ export async function getModelFacets() {
     inputModalities: mods.filter((m) => m.direction === "INPUT").map((m) => ({ value: modName.get(m.modalityId)!, label: modName.get(m.modalityId)!, count: m._count })).sort((a, b) => b.count - a.count),
   };
 }
-
-// ─────────────────────────── detail ───────────────────────────
 
 export async function getModel(slug: string) {
   const m = await prisma.model.findUnique({

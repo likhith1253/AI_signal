@@ -51,8 +51,6 @@ export function handler<Ctx>(fn: (req: Request, ctx: Ctx) => Promise<Response>) 
     }
   };
 }
-
-// ─────────────────────────── rate limiting ───────────────────────────
 // Fixed-window limiter per client IP. Best-effort: state is per server instance,
 // which is adequate for abuse protection on a read-only public API. A shared
 // store (e.g. Upstash Redis) can replace `buckets` without changing callers.
@@ -61,8 +59,8 @@ const WINDOW_MS = 60_000;
 const MAX_REQUESTS = 120;
 const buckets = new Map<string, { count: number; reset: number }>();
 
-export function rateLimit(req: Request, max = MAX_REQUESTS): Response | null {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "local";
+export function rateLimit(req: Request, max = MAX_REQUESTS, scope = "api"): Response | null {
+  const ip = `${scope}:${req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "local"}`;
   const now = Date.now();
   const b = buckets.get(ip);
   if (!b || b.reset < now) {

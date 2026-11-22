@@ -82,7 +82,7 @@ export function TypeTag({ type }: { type: string }) {
 /**
  * Atlas score as a surveyed spot height: a trig-point triangle and the value,
  * with a coverage rule underneath (how much of the score rests on data).
- * No score → an open triangle marked "uns." (unsurveyed).
+ * No score → an open triangle and a dash.
  */
 export function ScoreDial({ score, confidence, size = 40 }: { score: number | null | undefined; confidence?: number | null; size?: number }) {
   const conf = confidence ?? 0;
@@ -92,14 +92,14 @@ export function ScoreDial({ score, confidence, size = 40 }: { score: number | nu
     <span
       className="inline-flex shrink-0 flex-col items-start justify-center"
       style={{ minWidth: big ? 64 : 44 }}
-      title={score == null ? "Unsurveyed: not enough benchmark data for an Atlas score" : `Atlas score ${score.toFixed(1)} · ${Math.round(conf * 100)}% data coverage`}
+      title={score == null ? "No Atlas score: not enough benchmark data" : `Atlas score ${score.toFixed(1)} · ${Math.round(conf * 100)}% data coverage`}
     >
       <span className="flex items-center gap-1">
         <svg width={tri} height={tri} viewBox="0 0 10 10" aria-hidden>
           <path d="M5 1 L9.3 9 H0.7 Z" fill={score == null ? "none" : "var(--copper)"} stroke="var(--copper)" strokeWidth="1.2" />
           {score != null && <circle cx="5" cy="6.2" r="1.1" fill="var(--surface)" />}
         </svg>
-        <span className={cn("num leading-none", score == null ? "text-ink-3" : "text-ink", big ? "text-[19px]" : "text-[13px]")}>{score == null ? "uns." : score.toFixed(big ? 1 : 0)}</span>
+        <span className={cn("num leading-none", score == null ? "text-ink-3" : "text-ink", big ? "text-[19px]" : "text-[13px]")}>{score == null ? "—" : score.toFixed(big ? 1 : 0)}</span>
       </span>
       {score != null && (
         <span className="mt-1 block h-[2px] w-full bg-line">

@@ -13,7 +13,7 @@ export default function MethodologyPage() {
       <PageHeader sheet="11" eyebrow={`Methodology · ${METHODOLOGY}`} title="How OneAtlas scores and normalizes" description="Every number OneAtlas computes can be traced back to published inputs. This page is generated from the same constants the scoring code uses, so it cannot drift from the implementation." />
       <Container className="grid gap-6 py-7 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="flex flex-col gap-6">
-          <Panel title="Atlas Intelligence Score — dimensions and default weights">
+          <Panel title="Atlas Intelligence Score - dimensions and default weights">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[560px] text-left text-[13px]">
                 <thead>
@@ -42,7 +42,7 @@ export default function MethodologyPage() {
                 <code className="num rounded bg-surface-2 px-1.5 py-0.5 text-ink">overall = Σ(scoreᵢ × weightᵢ) ÷ Σ(weightᵢ for dimensions with data)</code>
               </p>
               <p>
-                Missing dimensions are <strong className="text-ink">excluded, not zeroed</strong>. The share of weight that had data is published as <em>coverage</em>. An overall score is only shown when coverage is at least <span className="num text-ink">{Math.round(MIN_CONFIDENCE * 100)}%</span>; because benchmark dimensions carry 45% of the default weight, a model with no benchmark signal never gets an overall score — its price and context alone cannot make it look &ldquo;intelligent&rdquo;.
+                Missing dimensions are <strong className="text-ink">excluded, not zeroed</strong>. The share of weight that had data is published as <em>coverage</em>. An overall score is only shown when coverage is at least <span className="num text-ink">{Math.round(MIN_CONFIDENCE * 100)}%</span>; because benchmark dimensions carry 45% of the default weight, a model with no benchmark signal never gets an overall score - its price and context alone cannot make it look &ldquo;intelligent&rdquo;.
               </p>
               <p>Benchmark dimensions use percentiles within the catalogue, so a 0–100 index and an Elo rating are never added together. Cost uses a log scale between the 5th and 95th percentile of blended prices, so a 10× price difference matters equally at any price level.</p>
               <p>
@@ -64,7 +64,7 @@ export default function MethodologyPage() {
           </Panel>
 
           <Panel title="Workload recommendations">
-            <p className="mb-3 text-[13.5px] text-ink-2">Each workload is a declarative profile: hard requirements filter the candidates, then a workload-specific weight vector ranks them. The final fit is confidence-adjusted: <code className="num rounded bg-surface-2 px-1">fit = score × (0.75 + 0.25 × coverage)</code>, so a model with complete data beats an equal score with gaps. No LLM is involved; results are reproducible.</p>
+            <p className="mb-3 text-[13.5px] text-ink-2">Each workload is a declarative profile: hard requirements filter the candidates, then a workload-specific weight vector ranks them. The final fit is confidence-adjusted: <code className="num rounded bg-surface-2 px-1">fit = score × (0.75 + 0.25 × coverage)</code>, so a model with complete data beats an equal score with gaps. The same data always gives the same picks.</p>
             <div className="grid gap-2 sm:grid-cols-2">
               {WORKLOADS.map((w) => (
                 <div key={w.slug} className="rounded-none border border-line p-3">

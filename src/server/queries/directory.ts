@@ -1,11 +1,9 @@
-/** Labs (model developers) and Providers (API hosts) — deliberately separate entities. */
+/** Labs (model developers) and Providers (API hosts) - deliberately separate entities. */
 import { prisma } from "../db/client";
 import { modelCardSelect, toCard } from "./models";
 import { median, num } from "./util";
 
 const ACTIVE = { status: { in: ["ACTIVE", "DEPRECATED"] as ("ACTIVE" | "DEPRECATED")[] } };
-
-// ─────────────────────────── labs ───────────────────────────
 
 export async function listLabs() {
   const labs = await prisma.lab.findMany({
@@ -66,8 +64,6 @@ export async function getLab(slug: string) {
     servedBy: servedBy.map((s) => ({ ...pmap.get(s.providerId)!, offerings: s._count })),
   };
 }
-
-// ─────────────────────────── providers ───────────────────────────
 
 export async function listProviders() {
   const providers = await prisma.provider.findMany({

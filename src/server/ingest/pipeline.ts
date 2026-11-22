@@ -1,12 +1,4 @@
-/**
- * Atlas Engine — staged ingestion pipeline.
- *
- *   fetch → validate → normalize → resolve → diff → commit → derive
- *
- * Every stage is timed and counted; the stage log, counters and validation
- * errors are persisted on the IngestionJob. In `plan` mode the pipeline stops
- * after `diff` and returns the changeset without writing catalogue data.
- */
+/** Ingestion pipeline: fetch, validate, normalize, resolve, diff, commit, derive. */
 import { Prisma, type PrismaClient } from "@prisma/client";
 import { mapLimit, openrouter } from "./openrouter/client";
 import {
@@ -37,8 +29,6 @@ import {
 import { diffCatalog, summarize, type CatalogModel, type Change, type ChangesetSummary } from "./diff";
 import { aaBenchmarkRef, arenaBenchmarkRef, DATA_SOURCES, LABS, type BenchmarkRef } from "./reference";
 import { deriveAll } from "./derive";
-
-// ─────────────────────────── types ───────────────────────────
 
 export interface NormalizedOffering {
   tag: string;
@@ -112,8 +102,6 @@ export interface IngestResult {
   errors: { ref: string; message: string }[];
 }
 
-// ─────────────────────────── stage runner ───────────────────────────
-
 class Stages {
   logs: StageLog[] = [];
   constructor(private log: (m: string) => void) {}
@@ -126,8 +114,6 @@ class Stages {
     return r;
   }
 }
-
-// ─────────────────────────── normalize ───────────────────────────
 
 function normalizeEndpoint(e: OREndpoint): NormalizedOffering {
   const providerSlug = providerSlugFromTag(e.tag, e.provider_name);
@@ -220,8 +206,6 @@ export function normalizeModel(m: ORModel, endpoints: OREndpoint[] | null): Norm
   };
 }
 
-// ─────────────────────────── snapshot of stored catalogue ───────────────────────────
-
 async function loadCatalog(db: PrismaClient): Promise<Map<string, CatalogModel>> {
   const rows = await db.model.findMany({
     select: {
@@ -259,8 +243,6 @@ async function loadCatalog(db: PrismaClient): Promise<Map<string, CatalogModel>>
     ]),
   );
 }
-
-// ─────────────────────────── main ───────────────────────────
 
 export async function runIngest(db: PrismaClient, opts: IngestOptions = {}): Promise<IngestResult> {
   const log = opts.log ?? (() => {});
@@ -376,7 +358,7 @@ export async function runIngest(db: PrismaClient, opts: IngestOptions = {}): Pro
       resolved.length,
       () => diffCatalog(prev, resolved),
       (r) => r.length,
-      () => (baseline ? "baseline run — no prior catalogue" : "changes vs stored catalogue"),
+      () => (baseline ? "baseline run - no prior catalogue" : "changes vs stored catalogue"),
     );
     const summary = summarize(changes, resolved.length);
 
@@ -425,8 +407,6 @@ export async function runIngest(db: PrismaClient, opts: IngestOptions = {}): Pro
   }
 }
 
-// ─────────────────────────── reference data ───────────────────────────
-
 export async function ensureReference(db: PrismaClient) {
   for (const s of DATA_SOURCES) {
     await db.dataSource.upsert({ where: { slug: s.slug }, create: s, update: { name: s.name, url: s.url, kind: s.kind, description: s.description, termsNote: s.termsNote } });
@@ -442,8 +422,6 @@ export async function ensureReference(db: PrismaClient) {
     await db.lab.upsert({ where: { slug: slugify(l.key) }, create: { slug: slugify(l.key), ...data }, update: data });
   }
 }
-
-// ─────────────────────────── commit ───────────────────────────
 
 interface CommitCtx {
   resolved: NormalizedModel[];
@@ -504,7 +482,7 @@ async function commit(db: PrismaClient, ctx: CommitCtx) {
     providerIds.set(slug, p.id);
   }
 
-  // families — identity is the slug, so "GPT" and "Gpt" resolve to one family
+  // families - identity is the slug, so "GPT" and "Gpt" resolve to one family
   const familyIds = new Map<string, string>();
   const familySlug = (labKey: string, family: string) => `${slugify(labKey)}-${slugify(family)}`;
   for (const f of await db.modelFamily.findMany({ select: { id: true, slug: true } })) familyIds.set(f.slug, f.id);

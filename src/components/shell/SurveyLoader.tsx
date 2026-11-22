@@ -18,13 +18,7 @@ function mulberry32(seed: number) {
   };
 }
 
-/**
- * First-visit loader: survey stations appear and are triangulated outward from
- * the origin station, while the counter "measures" the catalogue. Runs once per
- * session; click or Escape skips. A blocking script in <head> marks the document
- * as surveyed (return visit, reduced motion, automation) before paint, so the
- * overlay never flashes for those visitors.
- */
+/** First-visit loader animation. Plays once per session; click or Esc skips it. */
 export function SurveyLoader() {
   const [show, setShow] = useState(true);
   const [count, setCount] = useState(0);

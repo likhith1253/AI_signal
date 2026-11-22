@@ -63,7 +63,7 @@ describe("recommend", () => {
 
   it("adds caveats for single-provider models", () => {
     const r = recommend([cand("solo", { providerCount: 1 })], coding);
-    expect(r[0].caveats).toContain("Single provider — no failover");
+    expect(r[0].caveats).toContain("Single provider, no failover");
   });
 });
 
